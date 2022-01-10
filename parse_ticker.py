@@ -10,6 +10,7 @@ from pprint import pprint
 import sqlite3
 from sqlite3 import Error
 import os
+from get_tickers import upload_list
 
 BASE_DIR = os.path.join(os.getcwd())
 print(BASE_DIR)
@@ -24,9 +25,12 @@ def get_json_from_moex():
     Download raw json content from MOEX
     :return: json format file
     """
-    ticker_name = ['ROSN', 'LKOH']
+    ticker_list = upload_list()
+    print(type(ticker_list))
+    print(ticker_list)
+    ticker_list2 = ['ROSN', 'LKOH']
     file_format = 'json'
-    for t in ticker_name:
+    for t in ticker_list:
         request_url = 'https://iss.moex.com/iss/engines/stock/markets/shares/securities/{}.{}'.format(
             t, file_format)
         # TODO !!! если в конце слеш, то формат XML
@@ -57,14 +61,24 @@ def read_json(content_dict):
     print(type(raw_json))
 
     headers = content_dict['securities']['columns']
-    print("HEADERS")
+    print("HEADERS:")
     print(headers)
 
     header_values = content_dict['securities']['data']
+    print(header_values)
     header_values = header_values[0]
 
     value_dict = {key: value for key, value in zip(headers, header_values)}
     pprint(value_dict)
+    filter_keys_list = ['ISIN', 'SECID', 'LATNAME', 'SHORTNAME',
+                        'SECNAME', 'PREVDATE', 'PREVPRICE', 'LOTSIZE']
+    value_dict_filtered = {}
+    for key, value in value_dict.items():
+        if key in filter_keys_list:
+            value_dict_filtered[key] = value
+
+    pprint(value_dict_filtered)
+
     return value_dict
 
 

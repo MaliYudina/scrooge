@@ -1,4 +1,4 @@
-"""
+§§§§§§§§§§§§§§§§§§§§§§§§"""
 Login module:
   - registration of new users;
   - authorization of registered users
