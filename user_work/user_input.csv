@@ -1,0 +1,8 @@
+ticker,trans_type,type_code,date,cur,qty,price,
+MOEX,buy,2,2021-05-15,rub,13,1300
+SBER,sell,1,2021-10-15,usd,7,1500.60
+YNDX,buy,2,2021-05-15,rub,10,6700.90
+ROSN,buy,230,2020-05-15,rub,173,8900.60
+RGHN,sell,1,2021-10-15,usd,7,1500.60
+VTBA,buy,2,2021-05-15,rub,10,6700.90
+VTBX,buy,2,2022-01-15,rub,10,78900.90
