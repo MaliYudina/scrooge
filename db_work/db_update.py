@@ -26,6 +26,139 @@ def create_connection():
     return connection
 
 
+def create_table_user(connection):
+    """
+        Table Transactions stores all the buy & sell history.
+        User inputs manually (if not Tinkoff api)
+        Commissions for transactions, tickers dividends / coupons are stored as well.
+        This data helps to calculate taxes.
+        :param connection:
+        :return:
+        """
+    try:
+        sqlite_create_table_query = '''CREATE TABLE IF NOT EXISTS Users (
+                                    _id INTEGER PRIMARY KEY,
+                                    email TEXT UNIQUE,
+                                    name TEXT NOT NULL,
+                                    surname TEXT NOT NULL,
+                                    password TEXT NOT NULL, 
+                                    broker_name TEXT NOT NULL,
+                                    date_joined datetime);'''
+        # ('test@email.ru', 'kate', 'smirnova', 'kat123', 'Finam', '2022-02-15')
+        cursor = connection.cursor()
+        print("Successfully Connected to SQLite DB")
+        cursor.execute(sqlite_create_table_query)
+        connection.commit()
+        print("SQLite table 'USERS' successfully created!")
+        cursor.close()
+
+    except sqlite3.Error as error:
+        print("Error while creating a sqlite table ('USERS' table)", error)
+    finally:
+        if connection:
+            connection.commit()
+
+
+def update_values_user(connection, user_data):
+    try:
+        cursor = connection.cursor()
+        print("Connected to SQLite DB")
+
+        sqlite_insert_query = """INSERT OR IGNORE INTO Users
+                              (email, name, surname, password, broker_name, date_joined)
+                              VALUES (?, ?, ?, ?, ?, ?);"""
+
+        # update_data_sample = [
+        #     ('Petr', 'Ivanov', 'mail@mail.ru', '2019-05-15', 'Finam'),
+        #     ('Ivan', 'Petrof', 'inbox@mail.ru', '2020-06-10', 'Tinkoff, Finam'),
+        #     ('Katya', 'Smirnova', 'ya@mail.ru', '2021-10-20', 'Finam'),
+        #     ('Lena', 'Smith', 'yandex@mail.ru', '2021-10-20', 'Otkritie'),
+        # ]
+
+        cursor.execute(sqlite_insert_query, user_data)
+        connection.commit()
+        print("Total", cursor.rowcount, "records inserted successfully into USERS table")
+        print("Inserted data: ", user_data)
+        connection.commit()
+        cursor.close()
+
+    except sqlite3.Error as error:
+        print("Failed to insert record into sqlite table USERS", error)
+    finally:
+        if connection:
+            connection.commit()
+
+
+def create_table_transactions(connection):
+    try:
+        sqlite_create_table_query = '''CREATE TABLE IF NOT EXISTS Transactions (
+                                    user_email TEXT NOT NULL,
+                                     _id INTEGER PRIMARY KEY,
+                                     ticker TEXT NOT NULL,
+                                     trans_type TEXT NOT NULL,
+                                     type_code NOT NULL,
+                                     date NOT NULL,
+                                     cur TEXT NOT NULL,
+                                     qty NOT NULL,
+                                     price REAL NOT NULL,
+                                     total_price NOT NULL,
+                                     commission NOT NULL,
+                                     est_taxes INTEGER DEFAULT 0);'''
+        cursor = connection.cursor()
+        print("Successfully Connected to SQLite DB")
+        cursor.execute(sqlite_create_table_query)
+        connection.commit()
+        print("SQLite table 'TRANSACTIONS' successfully created!")
+        cursor.close()
+
+    except sqlite3.Error as error:
+        print("Error while creating a sqlite table ('TRANSACTIONS' table)", error)
+    finally:
+        if connection:
+            connection.commit()
+
+
+def update_values_transactions(connection, transactions):
+    try:
+        cursor = connection.cursor()
+        print("Connected to SQLite DB")
+
+        sqlite_insert_query = """INSERT INTO Transactions
+                               (user_email, ticker, trans_type, type_code, date, cur, qty, 
+                               price, total_price, commission, est_taxes)
+                               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"""
+        comm_rate = 0.03
+        tax_base = 0.13
+        choose_type_code = {'buy': 1,
+                            'sell': 2,
+                            'commission': 3}
+
+        for line in transactions_list:
+            user_email = line['user_email']
+            ticker = line['ticker']
+            trans_type = line["trans_type"]
+            type_code = choose_type_code.get(trans_type)
+            date = line['date']
+            cur = 'rub'
+            qty = int(line['qty'])
+            price = float(line['price'])
+            total_price = qty * price
+            commission = total_price * comm_rate
+            est_taxes = total_price * tax_base
+
+            update_data_sample = (user_email, ticker, trans_type, type_code, date, cur, qty,
+                              price, total_price, commission, est_taxes)
+            cursor.execute(sqlite_insert_query, update_data_sample)
+            connection.commit()
+        print("Total", cursor.rowcount, "Records inserted successfully into TRANSACTIONS table")
+        # cursor.close()
+
+    except sqlite3.Error as error:
+        print("Failed to insert multiple records into sqlite table TRANSACTIONS", error)
+    finally:
+        if connection:
+            connection.commit()
+
 def create_table_tickers(connection):
     """
     Table Tickers stores all the tickers ever bought by the investor. Ticker code and ID should unique
@@ -36,6 +169,7 @@ def create_table_tickers(connection):
     try:
         sqlite_create_table_query = '''CREATE TABLE IF NOT EXISTS Tickers (
                                     _id INTEGER PRIMARY KEY,
+                                    user_id INTEGER,
                                     ticker TEXT NOT NULL UNIQUE,
                                     name text NOT NULL);'''
         cursor = connection.cursor()
@@ -58,8 +192,8 @@ def update_values_tickers(ticker_data, connection):
         print("Connected to SQLite DB")
 
         sqlite_insert_query = """INSERT OR IGNORE INTO Tickers
-                              (ticker, name)
-                              VALUES (?, ?);"""
+                              (user_id, ticker, name)
+                              VALUES (?, ?, ?);"""
 
 
         ticker = ticker_data['SECID']
@@ -139,140 +273,6 @@ def update_values_history_prices(connection):
             connection.commit()
 
 
-def create_table_transactions(connection):
-    try:
-        sqlite_create_table_query = '''CREATE TABLE IF NOT EXISTS Transactions (
-                                    user_name TEXT NOT NULL,
-                                     _id INTEGER PRIMARY KEY,
-                                     ticker TEXT NOT NULL,
-                                     trans_type TEXT NOT NULL,
-                                     type_code NOT NULL,
-                                     date NOT NULL,
-                                     cur TEXT NOT NULL,
-                                     qty NOT NULL,
-                                     price REAL NOT NULL,
-                                     total_price NOT NULL,
-                                     commission NOT NULL,
-                                     est_taxes INTEGER DEFAULT 0);'''
-        cursor = connection.cursor()
-        print("Successfully Connected to SQLite DB")
-        cursor.execute(sqlite_create_table_query)
-        connection.commit()
-        print("SQLite table 'TRANSACTIONS' successfully created!")
-        cursor.close()
-
-    except sqlite3.Error as error:
-        print("Error while creating a sqlite table ('TRANSACTIONS' table)", error)
-    finally:
-        if connection:
-            connection.commit()
-
-
-def update_values_transactions(connection, transactions):
-    try:
-        cursor = connection.cursor()
-        print("Connected to SQLite DB")
-
-        sqlite_insert_query = """INSERT INTO Transactions
-                               (user_name, ticker, trans_type, type_code, date, cur, qty, 
-                               price, total_price, commission, est_taxes)
-                               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"""
-        comm_rate = 0.03
-        tax_base = 0.13
-        choose_type_code = {'buy': 1,
-                            'sell': 2,
-                            'commission': 3}
-
-        for line in transactions_list:
-            user_name = "test_user"
-            ticker = line['ticker']
-            trans_type = line["trans_type"]
-            type_code = choose_type_code.get(trans_type)
-            date = line['date']
-            cur = 'rub'
-            qty = int(line['qty'])
-            price = float(line['price'])
-            total_price = qty * price
-            commission = total_price * comm_rate
-            est_taxes = total_price * tax_base
-
-            update_data_sample = (user_name, ticker, trans_type, type_code, date, cur, qty,
-                              price, total_price, commission, est_taxes)
-            cursor.execute(sqlite_insert_query, update_data_sample)
-            connection.commit()
-        print("Total", cursor.rowcount, "Records inserted successfully into TRANSACTIONS table")
-        # cursor.close()
-
-    except sqlite3.Error as error:
-        print("Failed to insert multiple records into sqlite table TRANSACTIONS", error)
-    finally:
-        if connection:
-            connection.commit()
-
-
-def create_table_user(connection):
-    """
-        Table Transactions stores all the buy & sell history.
-        User inputs manually (if not Tinkoff api)
-        Commissions for transactions, tickers dividends / coupons are stored as well.
-        This data helps to calculate taxes.
-        :param connection:
-        :return:
-        """
-    try:
-        sqlite_create_table_query = '''CREATE TABLE IF NOT EXISTS Users (
-                                    _id INTEGER PRIMARY KEY,
-                                    email TEXT UNIQUE,
-                                    name TEXT NOT NULL,
-                                    surname TEXT NOT NULL,
-                                    password TEXT NOT NULL, 
-                                    broker_name TEXT NOT NULL,
-                                    date_joined datetime);'''
-        # ('test@email.ru', 'kate', 'smirnova', 'kat123', 'Finam', '2022-02-15')
-        cursor = connection.cursor()
-        print("Successfully Connected to SQLite DB")
-        cursor.execute(sqlite_create_table_query)
-        connection.commit()
-        print("SQLite table 'USERS' successfully created!")
-        cursor.close()
-
-    except sqlite3.Error as error:
-        print("Error while creating a sqlite table ('USERS' table)", error)
-    finally:
-        if connection:
-            connection.commit()
-
-
-def update_values_user(connection, user_data):
-    try:
-        cursor = connection.cursor()
-        print("Connected to SQLite DB")
-
-        sqlite_insert_query = """INSERT OR IGNORE INTO Users
-                              (email, name, surname, password, broker_name, date_joined)
-                              VALUES (?, ?, ?, ?, ?, ?);"""
-
-        # update_data_sample = [
-        #     ('Petr', 'Ivanov', 'mail@mail.ru', '2019-05-15', 'Finam'),
-        #     ('Ivan', 'Petrof', 'inbox@mail.ru', '2020-06-10', 'Tinkoff, Finam'),
-        #     ('Katya', 'Smirnova', 'ya@mail.ru', '2021-10-20', 'Finam'),
-        #     ('Lena', 'Smith', 'yandex@mail.ru', '2021-10-20', 'Otkritie'),
-        # ]
-
-        cursor.execute(sqlite_insert_query, user_data)
-        connection.commit()
-        print("Total", cursor.rowcount, "records inserted successfully into USERS table")
-        print("Inserted data: ", user_data)
-        connection.commit()
-        cursor.close()
-
-    except sqlite3.Error as error:
-        print("Failed to insert record into sqlite table USERS", error)
-    finally:
-        if connection:
-            connection.commit()
-
-
 def join_user_transactions(connection):
     """
     Table that joins registered user and their transactions
@@ -293,6 +293,23 @@ def join_user_transactions(connection):
     print(join)
 
 
+def find_login_pass(received_login):
+    search_login_set = (received_login,)
+    print(received_login)
+    cursor = connection.cursor()
+    cursor.execute("""SELECT email, password 
+        FROM Users 
+        WHERE name=?""", str(received_login))
+
+    login_and_pass_result = cursor.fetchone()
+    print(f"result for email login {received_login}:")
+    print(login_and_pass_result)
+    # db_email = result[0]
+    # db_pass = result[1]
+    print('password for searched email is ', login_and_pass_result)
+    return login_and_pass_result
+
+
 def calculations():
     cursor = connection.cursor()
     cursor.execute("SELECT SUM(commission) FROM Transactions;")
@@ -311,36 +328,50 @@ def read_users_table():
         print(r)
 
 
-def read_login_pass_users():
+def read_transactions_table():
     cursor = connection.cursor()
-    search_login = 'mail@mail.ru'
-    search_login_set = (search_login,)
-    cursor.execute("""SELECT name, surname, email 
-        FROM Users
-        WHERE Users.email=?""", search_login_set)
-    cursor.execute("SELECT * from Users")
-    login_result = cursor.fetchone()
-    print("User name: ", login_result)
-    return login_result
+    cursor.execute("SELECT * from Transactions")
+    result = cursor.fetchall()
 
+    print("DB content Transactions: ")
+    for r in result:
+        print(r)
+
+
+def validate_login_pass(search_login):
+    cursor = connection.cursor()
+    search_login_set = (search_login,)
+    cursor.execute("""SELECT email, password 
+        FROM Users
+        WHERE email=?""", search_login_set)
+    read_result = cursor.fetchone()
+    print("DB reading is finished, below the validation results: ")
+    print("-------")
+    print("Users email & passwords: ", read_result)
+    return read_result
 
 
 connection = create_connection()
+
+# create_table_user(connection=connection)
+# update_values_user(connection=connection, user_data=login.register_user())
+#
+# create_table_transactions(connection)
+# update_values_transactions(connection=connection, transactions=transactions_list)
 
 # create_table_tickers(connection)
 # update_values_tickers(ticker_data=filter_response(value_dict=read_json(content_dict=get_json_from_moex())),
 #                       connection=connection)
 
-# create_table_transactions(connection)
-# update_values_transactions(connection=connection, transactions=transactions_list)
+
 
 # create_table_history_prices(connection)
 # update_values_history_prices(connection=connection)
-create_table_user(connection=connection)
-update_values_user(connection=connection, user_data=login.register_user())
+
 # join_user_transactions(connection=connection)
 
-# read_db()
 # calculations()
-read_users_table()
+# read_users_table()
+# read_transactions_table()
+
 # read_login_pass_users()
