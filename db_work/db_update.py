@@ -1,29 +1,14 @@
 """
 DB_update module creates DB and updates the values for received tickers
 """
-from user_work import login
 import sqlite3
-from sqlite3 import Error
-import os
 from user_work.read_json import read_json
+from db_work.db_config import create_connection
 
-current_dir = os.path.abspath(os.path.dirname(__file__))
-db_file = os.path.join(current_dir, 'sql_investor.db')
-print(db_file)
+connection = create_connection()
 
 json_file_path = '/Users/mali/PycharmProjects/investor/user_work/json_input.json'
 transactions_list = read_json(json_file_path)
-
-
-def create_connection():
-    connection = None
-    try:
-        connection = sqlite3.connect(db_file)
-        print("Connection to SQLite DB successful")
-    except Error as e:
-        print(f"The error '{e}' occurred")
-
-    return connection
 
 
 def create_table_user(connection):
@@ -347,11 +332,9 @@ def validate_login_pass(search_login):
     read_result = cursor.fetchone()
     print("DB reading is finished, below the validation results: ")
     print("-------")
-    print("Users email & passwords: ", read_result)
+    print("User's email & passwords: ", read_result)
     return read_result
 
-
-connection = create_connection()
 
 # create_table_user(connection=connection)
 # update_values_user(connection=connection, user_data=login.register_user())
