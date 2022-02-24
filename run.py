@@ -1,7 +1,10 @@
-from user_work.login import *
+
+from user_work.login import hi_user, login_user, register_user, authorize_user
+from user_work.get_user_input import caller
 from db_work.db_config import create_connection
-from user_work.get_user_input import ask_input
-from db_work.db_update import validate_login_pass, read_users_table
+from db_work.db_update import validate_login_pass, read_users_table, update_values_user
+
+import pdb
 
 
 def main():
@@ -20,17 +23,15 @@ def main():
                            db_email=stored_db_email,
                            db_password=stored_db_pass
                            )
-            ask_input()
+            caller()
         if login_or_register == 'r':
-            register_user()
-            update_values_user(connection=create_connection())
+            new_user = register_user()
+            print("----- New user data: -----", new_user)
+            update_values_user(connection=create_connection(), user_data=new_user)
+            print("-----Let's see the User Table: -----")
+            read_users_table()
     except:
         hi_user()
-
-    # if authorized_user is True:
-    #     ask_input()
-
-    read_users_table()
 
 
 if __name__ == '__main__':

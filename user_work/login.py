@@ -4,7 +4,6 @@ Login module:
   - authorization of registered users
 """
 from datetime import datetime
-from db_work.db_update import update_values_user
 
 
 def hi_user():
@@ -42,7 +41,6 @@ def register_user() -> tuple:
     now = now.strftime("%Y-%m-%d")
     new_user_data = (email, name, surname, password, broker_name, now)
     print("New user will be registered and added to DB\n", new_user_data)
-    update_values_user(connection=connection, user_data=new_user_data)
     # <class 'tuple'> ('test@email.ru', 'kate', 'smirnova', 'kat123', 'Finam', '2022-02-15')
     return new_user_data
 

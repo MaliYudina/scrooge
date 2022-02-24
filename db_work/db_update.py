@@ -47,26 +47,15 @@ def create_table_user(connection):
 def update_values_user(connection, user_data):
     try:
         cursor = connection.cursor()
-        print("Connected to SQLite DB")
-
         sqlite_insert_query = """INSERT OR IGNORE INTO Users
                               (email, name, surname, password, broker_name, date_joined)
                               VALUES (?, ?, ?, ?, ?, ?);"""
-
-        # update_data_sample = [
-        #     ('Petr', 'Ivanov', 'mail@mail.ru', '2019-05-15', 'Finam'),
-        #     ('Ivan', 'Petrof', 'inbox@mail.ru', '2020-06-10', 'Tinkoff, Finam'),
-        #     ('Katya', 'Smirnova', 'ya@mail.ru', '2021-10-20', 'Finam'),
-        #     ('Lena', 'Smith', 'yandex@mail.ru', '2021-10-20', 'Otkritie'),
-        # ]
-
         cursor.execute(sqlite_insert_query, user_data)
         connection.commit()
-        print("Total", cursor.rowcount, "records inserted successfully into USERS table")
-        print("Inserted data: ", user_data)
+        print("Data to insert: ", user_data)
         connection.commit()
         cursor.close()
-
+        print("---- Successfully added to USERS Table! ----")
     except sqlite3.Error as error:
         print("Failed to insert record into sqlite table USERS", error)
     finally:
@@ -143,6 +132,7 @@ def update_values_transactions(connection, transactions):
     finally:
         if connection:
             connection.commit()
+
 
 def create_table_tickers(connection):
     """
@@ -336,13 +326,13 @@ def validate_login_pass(search_login):
     return read_result
 
 
-# create_table_user(connection=connection)
+create_table_user(connection=connection)
 # update_values_user(connection=connection, user_data=login.register_user())
 #
-# create_table_transactions(connection)
+create_table_transactions(connection)
 # update_values_transactions(connection=connection, transactions=transactions_list)
 
-# create_table_tickers(connection)
+create_table_tickers(connection)
 # update_values_tickers(ticker_data=filter_response(value_dict=read_json(content_dict=get_json_from_moex())),
 #                       connection=connection)
 
@@ -352,7 +342,6 @@ def validate_login_pass(search_login):
 # update_values_history_prices(connection=connection)
 
 # join_user_transactions(connection=connection)
-
 # calculations()
 # read_users_table()
 # read_transactions_table()

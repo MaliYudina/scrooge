@@ -19,6 +19,11 @@ LOG = logging.getLogger('get_user_input')
 
 
 def ask_input():
+    """
+    ask_input function gives the logged user choice of further actions,
+    such as checking portfolio or adding some new data
+    :return:
+    """
     print("-- Let's start investing. Please choose option: --")
     choice_number = input(
         "Add transactions : 1\n"
@@ -26,14 +31,12 @@ def ask_input():
         "Check coupons transactions : 3\n"
         "Read news : 4\n"
     )
-
-    # проверить как использовать указатель на функцию
     options_choice = {'1': add_transactions,
                       '2': show_portfolio,
                       '3': get_coupons,
                       '4': show_news,
                       }
-    print(choice_number)
+    print("Your choice: ", choice_number)
     func_pointer = options_choice[choice_number]
     return func_pointer
 
@@ -83,9 +86,3 @@ def upload_list():
 
 def broker_authorization():
     pass
-#
-
-
-caller()
-# add_transactions(csv_file=INPUT_CSV, json_file=OUTPUT_JSON)
-
