@@ -4,6 +4,7 @@ DB_update module creates DB and updates the values for received tickers
 import sqlite3
 from user_work.read_json import read_json
 from db_work.db_config import create_connection
+# from moex_api.get_coupons import get_coupons
 
 connection = create_connection()
 
@@ -129,6 +130,53 @@ def update_values_transactions(connection, transactions):
 
     except sqlite3.Error as error:
         print("Failed to insert multiple records into sqlite table TRANSACTIONS", error)
+    finally:
+        if connection:
+            connection.commit()
+
+
+def create_table_dividends(connection):
+    try:
+        sqlite_create_table_query = '''CREATE TABLE IF NOT EXISTS Dividends (
+                                     _id INTEGER PRIMARY KEY,
+                                     ticker TEXT NOT NULL,
+                                     date NOT NULL,
+                                     price REAL NOT NULL);'''
+        cursor = connection.cursor()
+        print("Successfully Connected to SQLite DB")
+        cursor.execute(sqlite_create_table_query)
+        connection.commit()
+        print("SQLite table 'DIVIDENDS' successfully created!")
+        cursor.close()
+
+    except sqlite3.Error as error:
+        print("Error while creating a sqlite table ('DIVIDENDS' table)", error)
+    finally:
+        if connection:
+            connection.commit()
+
+
+def update_values_dividends(connection, dividends):
+    try:
+        cursor = connection.cursor()
+        print("Connected to SQLite DB")
+
+        sqlite_insert_query = """INSERT OR IGNORE INTO Dividends
+                               (ticker, date, price)
+                               VALUES (?, ?, ?);"""
+
+        for line in dividends:
+            ticker = line[0]
+            date = line[1]
+            price = line[2]
+            update_data = (ticker, date, price)
+            cursor.execute(sqlite_insert_query, update_data)
+            connection.commit()
+        print("Total", cursor.rowcount, "Records inserted successfully into DIVIDENDS table")
+        # cursor.close()
+
+    except sqlite3.Error as error:
+        print("Failed to insert multiple records into sqlite table DIVIDENDS", error)
     finally:
         if connection:
             connection.commit()
@@ -313,6 +361,17 @@ def read_transactions_table():
         print(r)
 
 
+def get_tickers_data_for_dividends():
+    cursor = connection.cursor()
+    cursor.execute("SELECT ticker, date, qty from Transactions")
+    result = cursor.fetchall()
+
+    print("tickers to calculate dividends: ")
+    for r in result:
+        print(r)
+    return result
+
+
 def validate_login_pass(search_login):
     cursor = connection.cursor()
     search_login_set = (search_login,)
@@ -333,6 +392,16 @@ create_table_transactions(connection)
 # update_values_transactions(connection=connection, transactions=transactions_list)
 
 create_table_tickers(connection)
+# get_tickers_data_for_dividends()
+
+create_table_dividends(connection=connection)
+update_values_dividends(connection=connection, dividends=[["SBER", "2019-06-13", 16],
+                                                          ["SBER", "2019-06-13", 16],
+                                                          ["SBER", "2019-06-13", 186],
+                                                          ["ROSN", "2020-06-13", 50],
+                                                          ["SBER", "2019-06-13", 789]
+                                                          ])
+
 # update_values_tickers(ticker_data=filter_response(value_dict=read_json(content_dict=get_json_from_moex())),
 #                       connection=connection)
 
