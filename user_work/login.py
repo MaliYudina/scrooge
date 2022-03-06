@@ -4,10 +4,12 @@ Login module:
   - authorization of registered users
 """
 from datetime import datetime
+from db_work.db_config import create_connection
+from db_work.db_update import validate_login_pass, read_users_table, update_values_user
 
 
 def hi_user():
-    start_input = input("--Hello, user! \nPlease type 'l' for login or 'r' for registration\n")
+    start_input = input("-- Hello, user! -- \nPlease type \n  'l' for login or \n  'r' for registration\n")
     return start_input
 
 
@@ -49,8 +51,33 @@ def authorize_user(email, password, db_email, db_password):
     if email in db_email:  # str email in db_email tuple
         if password == db_password:
             print("Welcome back, {}!. You are successfully signed in!".format(email))
-            return True
+            return email
         else:
             print("Sorry, {}! Login data is wrong.\nPlease register new account or check login data.".format(email))
-            register_user()
+            hi_user()
 
+
+def run_welcome():
+    login_or_register = hi_user()
+    if login_or_register == 'l':
+        input_email_pass = login_user()
+        input_email = input_email_pass[0]
+        input_password = input_email_pass[1]
+
+        stored_email_pass = validate_login_pass(search_login=input_email)
+        stored_db_email = stored_email_pass[0]
+        stored_db_pass = stored_email_pass[1]
+        authorize_user(email=input_email,
+                       password=input_password,
+                       db_email=stored_db_email,
+                       db_password=stored_db_pass
+                       )
+    if login_or_register == 'r':
+        new_user = register_user()
+        print("----- New user data: -----", new_user)
+        update_values_user(connection=create_connection(),
+                           user_data=new_user)
+        print("-----Let's see the User Table: -----")
+
+
+run_welcome()

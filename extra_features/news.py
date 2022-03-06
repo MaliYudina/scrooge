@@ -7,6 +7,16 @@ import requests
 # from bs4 import BeautifulSoup
 
 
+def show_news():
+    all_news = requests.get("http://iss.moex.com/iss/sitenews.json?")
+    all_news = all_news.json()
+    all_news = all_news['sitenews']['data']
+    print(len(all_news))
+    for a in all_news:
+        print(a)
+    return all_news
+
+
 def get_tickers_list():
     pass
 
@@ -35,11 +45,3 @@ def set_notifications():
     pass
 
 
-def show_news():
-    r = requests.get('https://quote.rbc.ru/?utm_source=topline')
-    parsed_string = r.text
-    # soup = BeautifulSoup(parsed_string, "html.parser")
-    # news = soup.text[0:100]
-    fake_news = "some normal news will be here"
-    print(fake_news)
-    return fake_news

@@ -4,11 +4,12 @@ DB_update module creates DB and updates the values for received tickers
 import sqlite3
 from user_work.read_json import read_json
 from db_work.db_config import create_connection
+
 # from moex_api.get_coupons import get_coupons
 
 connection = create_connection()
 
-json_file_path = '/Users/mali/PycharmProjects/investor/user_work/json_input.json'
+json_file_path = '/user_work/transactions_json.json'
 transactions_list = read_json(json_file_path)
 
 
@@ -115,14 +116,14 @@ def update_values_transactions(connection, transactions):
             type_code = choose_type_code.get(trans_type)
             date = line['date']
             cur = 'rub'
-            qty = int(line['qty'])
-            price = float(line['price'])
+            qty = (int(line['qty'])) * -1  # TODO check
+            price = (float(line['price'])) * -1
             total_price = qty * price
             commission = total_price * comm_rate
             est_taxes = total_price * tax_base
 
             update_data_sample = (user_email, ticker, trans_type, type_code, date, cur, qty,
-                              price, total_price, commission, est_taxes)
+                                  price, total_price, commission, est_taxes)
             cursor.execute(sqlite_insert_query, update_data_sample)
             connection.commit()
         print("Total", cursor.rowcount, "Records inserted successfully into TRANSACTIONS table")
@@ -217,7 +218,6 @@ def update_values_tickers(ticker_data, connection):
         sqlite_insert_query = """INSERT OR IGNORE INTO Tickers
                               (user_id, ticker, name)
                               VALUES (?, ?, ?);"""
-
 
         ticker = ticker_data['SECID']
         name = ticker_data['SHORTNAME']
@@ -379,7 +379,7 @@ def validate_login_pass(search_login):
         FROM Users
         WHERE email=?""", search_login_set)
     read_result = cursor.fetchone()
-    print("DB reading is finished, below the validation results: ")
+    print("Checking login and password data...")
     print("-------")
     print("User's email & passwords: ", read_result)
     return read_result
@@ -404,7 +404,6 @@ update_values_dividends(connection=connection, dividends=[["SBER", "2019-06-13",
 
 # update_values_tickers(ticker_data=filter_response(value_dict=read_json(content_dict=get_json_from_moex())),
 #                       connection=connection)
-
 
 
 # create_table_history_prices(connection)

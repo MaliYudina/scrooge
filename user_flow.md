@@ -1,16 +1,20 @@
 V 1.0
+-- User workflow --
 
-1. login / register user
+1. ask login / register user
 2. authorize user
 3. write new user to db
-4. ask for transactions
+4. ask for actions:
+4.1. add new transactions
+4.2 show portfolio
 5. input transactions
-6. write down transactions to db
-7. update user's portfolio:
+6. show news
+7. write down transactions to db
+8. update user's portfolio:
    - calculate average price
    - calculate total price
    - calculate % per total portfolio
-   - show category (shares/bonds...)
+   - divide per categories (shares/bonds...)
    - calculate total coupons
 
 V 2.0

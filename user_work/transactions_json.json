@@ -45,28 +45,6 @@
     },
     {
         "user_email": "vasya@test.ru",
-        "ticker": "RGHN",
-        "trans_type": "sell",
-        "type_code": "1",
-        "date": "2021-10-15",
-        "cur": "usd",
-        "qty": "7",
-        "price": "1500.60",
-        "": null
-    },
-    {
-        "user_email": "vasya@test.ru",
-        "ticker": "VTBA",
-        "trans_type": "buy",
-        "type_code": "2",
-        "date": "2021-05-15",
-        "cur": "rub",
-        "qty": "10",
-        "price": "6700.90",
-        "": null
-    },
-    {
-        "user_email": "vasya@test.ru",
         "ticker": "VTBX",
         "trans_type": "buy",
         "type_code": "2",
@@ -74,6 +52,28 @@
         "cur": "rub",
         "qty": "10",
         "price": "78900.90",
+        "": null
+    },
+    {
+        "user_email": "vasya@test.ru",
+        "ticker": "SBER",
+        "trans_type": "buy",
+        "type_code": "2",
+        "date": "2021-05-15",
+        "cur": "rub",
+        "qty": "13",
+        "price": "7300",
+        "": null
+    },
+    {
+        "user_email": "vasya@test.ru",
+        "ticker": "SBER",
+        "trans_type": "buy",
+        "type_code": "2",
+        "date": "2029-05-15",
+        "cur": "rub",
+        "qty": "13",
+        "price": "8300",
         "": null
     }
 ]

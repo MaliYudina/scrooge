@@ -2,7 +2,8 @@ import json
 import os
 
 current_dir = os.path.abspath(os.path.dirname(__file__))
-file_path = os.path.join(current_dir, 'json_input.json')
+file_path = os.path.join(current_dir, 'transactions_json.json')
+print(file_path)
 
 
 def read_json(json_file):

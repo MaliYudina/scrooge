@@ -3,6 +3,7 @@ vasya@test.ru,MOEX,buy,2,2021-05-15,rub,13,1300
 vasya@test.ru,SBER,sell,1,2021-10-15,usd,7,1500.60
 vasya@test.ru,YNDX,buy,2,2021-05-15,rub,10,6700.90
 vasya@test.ru,ROSN,buy,230,2020-05-15,rub,173,8900.60
-vasya@test.ru,RGHN,sell,1,2021-10-15,usd,7,1500.60
-vasya@test.ru,VTBA,buy,2,2021-05-15,rub,10,6700.90
 vasya@test.ru,VTBX,buy,2,2022-01-15,rub,10,78900.90
+vasya@test.ru,SBER,buy,2,2021-05-15,rub,13,7300
+vasya@test.ru,SBER,buy,2,2029-05-15,rub,13,8300
+
