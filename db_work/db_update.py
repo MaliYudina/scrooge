@@ -2,15 +2,13 @@
 DB_update module creates DB and updates the values for received tickers
 """
 import sqlite3
-from user_work.read_json import read_json
+from user_work.get_user_csv import add_new_transactions
 from db_work.db_config import create_connection
 
-# from moex_api.get_coupons import get_coupons
+from moex_api.get_specification import get_secid_specification
 
 connection = create_connection()
-
-json_file_path = '/user_work/transactions_json.json'
-transactions_list = read_json(json_file_path)
+transactions_list = add_new_transactions()
 
 
 def create_table_user(connection):
@@ -97,6 +95,8 @@ def create_table_transactions(connection):
 def update_values_transactions(connection, transactions):
     try:
         cursor = connection.cursor()
+        transactions = transactions_list
+        print(transactions)
         print("Connected to SQLite DB")
 
         sqlite_insert_query = """INSERT INTO Transactions
@@ -109,15 +109,19 @@ def update_values_transactions(connection, transactions):
                             'sell': 2,
                             'commission': 3}
 
-        for line in transactions_list:
+        for line in transactions:
             user_email = line['user_email']
             ticker = line['ticker']
             trans_type = line["trans_type"]
             type_code = choose_type_code.get(trans_type)
+            if type_code == 2:
+                qty = (int(line['qty'])) * -1
+                price = (float(line['price'])) * -1
+            else:
+                qty = int(line['qty'])
+                price = float(line['price'])
             date = line['date']
             cur = 'rub'
-            qty = (int(line['qty'])) * -1  # TODO check
-            price = (float(line['price'])) * -1
             total_price = qty * price
             commission = total_price * comm_rate
             est_taxes = total_price * tax_base
@@ -193,9 +197,13 @@ def create_table_tickers(connection):
     try:
         sqlite_create_table_query = '''CREATE TABLE IF NOT EXISTS Tickers (
                                     _id INTEGER PRIMARY KEY,
-                                    user_id INTEGER,
                                     ticker TEXT NOT NULL UNIQUE,
-                                    name text NOT NULL);'''
+                                    name text NOT NULL,
+                                    isin text NOT NULL UNIQUE,
+                                    group_ text NOT NULL,
+                                    type text NOT NULL,
+                                    groupname text NOT NULL,
+                                    typename text NOT NULL);'''
         cursor = connection.cursor()
         print("Successfully Connected to SQLite DB")
         cursor.execute(sqlite_create_table_query)
@@ -210,24 +218,37 @@ def create_table_tickers(connection):
             connection.commit()
 
 
-def update_values_tickers(ticker_data, connection):
+def update_values_tickers(connection, ticker_data):
+    """
+    Table with SECID specification data, new SECID added if new distinct tickers
+    found in Transactions table
+    :param connection:
+    :param ticker_data: dictiionary
+    :return:
+    """
     try:
         cursor = connection.cursor()
         print("Connected to SQLite DB")
+        cursor.execute("SELECT DISTINCT ticker from Transactions;")
+        tickers_set = cursor.fetchall()
+        print(tickers_set)
+        for ticker in tickers_set:
+            print(ticker[0])
+            sqlite_insert_query = """INSERT OR IGNORE INTO Tickers
+                              (ticker, name, isin, group_, type, groupname, typename)
+                              VALUES (?, ?, ?, ?, ?, ?, ?);"""
+            ticker = ticker_data['SECID']
+            name = ticker_data['NAME']
+            isin = ticker_data['ISIN']
+            group = ticker_data['GROUP']
+            type = ticker_data['TYPE']
+            group_name = ticker_data['GROUPNAME']
+            type_name = ticker_data['TYPENAME']
 
-        sqlite_insert_query = """INSERT OR IGNORE INTO Tickers
-                              (user_id, ticker, name)
-                              VALUES (?, ?, ?);"""
-
-        ticker = ticker_data['SECID']
-        name = ticker_data['SHORTNAME']
-        record_list = [('GAZP-3', 'Gazprom3'),
-                       ('TCSG', 'Tinkoff'),
-                       # ('VISA', 'Visa card'),
-                       # ('YNDX', 'Yandex')
-                       ]
-        cursor.executemany(sqlite_insert_query, record_list)
-        connection.commit()
+            update_data = (ticker, name, isin, group, type, group_name, type_name)
+            print(update_data)
+            cursor.execute(sqlite_insert_query, update_data)
+            connection.commit()
         print("Total", cursor.rowcount, "Records inserted successfully into TICKERS table")
         connection.commit()
         cursor.close()
@@ -316,23 +337,6 @@ def join_user_transactions(connection):
     print(join)
 
 
-def find_login_pass(received_login):
-    search_login_set = (received_login,)
-    print(received_login)
-    cursor = connection.cursor()
-    cursor.execute("""SELECT email, password 
-        FROM Users 
-        WHERE name=?""", str(received_login))
-
-    login_and_pass_result = cursor.fetchone()
-    print(f"result for email login {received_login}:")
-    print(login_and_pass_result)
-    # db_email = result[0]
-    # db_pass = result[1]
-    print('password for searched email is ', login_and_pass_result)
-    return login_and_pass_result
-
-
 def calculations():
     cursor = connection.cursor()
     cursor.execute("SELECT SUM(commission) FROM Transactions;")
@@ -343,7 +347,7 @@ def calculations():
 
 def read_users_table():
     cursor = connection.cursor()
-    cursor.execute("SELECT * from Users")
+    cursor.execute("SELECT * from Users;")
     result = cursor.fetchall()
 
     print("DB content Users: ")
@@ -353,7 +357,7 @@ def read_users_table():
 
 def read_transactions_table():
     cursor = connection.cursor()
-    cursor.execute("SELECT * from Transactions")
+    cursor.execute("SELECT * from Transactions;")
     result = cursor.fetchall()
 
     print("DB content Transactions: ")
@@ -361,14 +365,24 @@ def read_transactions_table():
         print(r)
 
 
-def get_tickers_data_for_dividends():
+def read_tickers_table():
     cursor = connection.cursor()
-    cursor.execute("SELECT ticker, date, qty from Transactions")
+    cursor.execute("SELECT * from Tickers GROUP BY group_;")
     result = cursor.fetchall()
 
-    print("tickers to calculate dividends: ")
+    print("DB content Tickers: ")
     for r in result:
         print(r)
+
+
+def get_tickers_data_for_dividends():
+    cursor = connection.cursor()
+    cursor.execute("SELECT ticker, date, qty from Transactions;")
+    result = cursor.fetchall()
+
+    # print("tickers to calculate dividends: ")
+    # for r in result:
+    #     print(r)
     return result
 
 
@@ -381,37 +395,55 @@ def validate_login_pass(search_login):
     read_result = cursor.fetchone()
     print("Checking login and password data...")
     print("-------")
-    print("User's email & passwords: ", read_result)
+    # print("User's email & passwords: ", read_result)
     return read_result
 
 
-create_table_user(connection=connection)
-# update_values_user(connection=connection, user_data=login.register_user())
-#
-create_table_transactions(connection)
-# update_values_transactions(connection=connection, transactions=transactions_list)
-
-create_table_tickers(connection)
-# get_tickers_data_for_dividends()
-
-create_table_dividends(connection=connection)
-update_values_dividends(connection=connection, dividends=[["SBER", "2019-06-13", 16],
-                                                          ["SBER", "2019-06-13", 16],
-                                                          ["SBER", "2019-06-13", 186],
-                                                          ["ROSN", "2020-06-13", 50],
-                                                          ["SBER", "2019-06-13", 789]
-                                                          ])
-
-# update_values_tickers(ticker_data=filter_response(value_dict=read_json(content_dict=get_json_from_moex())),
-#                       connection=connection)
+# def create_tables():
+#     dividends = create_table_dividends
+#     history_prices = create_table_history_prices
+#     tickers = create_table_tickers
+#     transactions = create_table_transactions
+#     user = create_table_user
 
 
-# create_table_history_prices(connection)
-# update_values_history_prices(connection=connection)
+if __name__ == "__main__":
+    print("Running db_update.py")
+    con = connection
+    # create_tables()()
+    create_table_user(connection=connection)
+    create_table_transactions(connection=connection)
+    create_table_dividends(connection=connection)
+    create_table_tickers(connection)
 
-# join_user_transactions(connection=connection)
-# calculations()
-# read_users_table()
-# read_transactions_table()
 
-# read_login_pass_users()
+    update_values_transactions(connection=connection, transactions=transactions_list)
+
+
+    example_list = ['MOEX', 'SBER', 'YNDX', 'ROSN', 'VTBX', 'AAPL', 'FXCN', 'VKCO', 'DIS-RM', 'GLTR']
+    for i in example_list:
+        update_values_tickers(connection, ticker_data=get_secid_specification(i))
+    read_tickers_table()
+    # get_tickers_data_for_dividends()
+
+
+    # update_values_dividends(connection=connection, dividends=[["SBER", "2019-06-13", 16],
+    #                                                       ["SBER", "2019-06-13", 16],
+    #                                                       ["SBER", "2019-06-13", 186],
+    #                                                       ["ROSN", "2020-06-13", 50],
+    #                                                       ["SBER", "2019-06-13", 789]
+    #                                                       ])
+
+    # update_values_tickers(ticker_data=filter_response(value_dict=read_json(content_dict=get_json_from_moex())),
+    #                       connection=connection)
+
+
+    # create_table_history_prices(connection)
+    # update_values_history_prices(connection=connection)
+
+    # join_user_transactions(connection=connection)
+    # calculations()
+    # read_users_table()
+    # read_transactions_table()
+
+    # read_login_pass_users()

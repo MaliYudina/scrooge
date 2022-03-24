@@ -1,69 +1,43 @@
 [
     {
-        "user_email": "vasya@test.ru",
+        "user_email": "petr@test.ru",
         "ticker": "MOEX",
         "trans_type": "buy",
         "type_code": "2",
         "date": "2021-05-15",
         "cur": "rub",
         "qty": "13",
-        "price": "1300",
-        "": null
+        "price": "1300"
+    },
+    {
+        "user_email": "petr@test.ru",
+        "ticker": "MOEX",
+        "trans_type": "buy",
+        "type_code": "3",
+        "date": "2021-05-15",
+        "cur": "rub",
+        "qty": "2",
+        "price": "1400"
+    },
+    {
+        "user_email": "petr@test.ru",
+        "ticker": "SBER",
+        "trans_type": "buy",
+        "type_code": "1",
+        "date": "2021-10-15",
+        "cur": "rub",
+        "qty": "10",
+        "price": "2000"
     },
     {
         "user_email": "vasya@test.ru",
         "ticker": "SBER",
         "trans_type": "sell",
         "type_code": "1",
-        "date": "2021-10-15",
-        "cur": "usd",
-        "qty": "7",
-        "price": "1500.60",
-        "": null
-    },
-    {
-        "user_email": "vasya@test.ru",
-        "ticker": "YNDX",
-        "trans_type": "buy",
-        "type_code": "2",
         "date": "2021-05-15",
         "cur": "rub",
-        "qty": "10",
-        "price": "6700.90",
-        "": null
-    },
-    {
-        "user_email": "vasya@test.ru",
-        "ticker": "ROSN",
-        "trans_type": "buy",
-        "type_code": "230",
-        "date": "2020-05-15",
-        "cur": "rub",
-        "qty": "173",
-        "price": "8900.60",
-        "": null
-    },
-    {
-        "user_email": "vasya@test.ru",
-        "ticker": "VTBX",
-        "trans_type": "buy",
-        "type_code": "2",
-        "date": "2022-01-15",
-        "cur": "rub",
-        "qty": "10",
-        "price": "78900.90",
-        "": null
-    },
-    {
-        "user_email": "vasya@test.ru",
-        "ticker": "SBER",
-        "trans_type": "buy",
-        "type_code": "2",
-        "date": "2021-05-15",
-        "cur": "rub",
-        "qty": "13",
-        "price": "7300",
-        "": null
+        "qty": "5",
+        "price": "2400"
     },
     {
         "user_email": "vasya@test.ru",
@@ -72,8 +46,47 @@
         "type_code": "2",
         "date": "2029-05-15",
         "cur": "rub",
-        "qty": "13",
-        "price": "8300",
-        "": null
+        "qty": "3",
+        "price": "2600"
+    },
+    {
+        "user_email": "vasya@test.ru",
+        "ticker": "TCSG",
+        "trans_type": "buy",
+        "type_code": "2",
+        "date": "2029-05-15",
+        "cur": "rub",
+        "qty": "3",
+        "price": "2600"
+    },
+    {
+        "user_email": "vasya@test.ru",
+        "ticker": "TCSG",
+        "trans_type": "sell",
+        "type_code": "2",
+        "date": "2030-05-15",
+        "cur": "rub",
+        "qty": "3",
+        "price": "6600"
+    },
+    {
+        "user_email": "travis",
+        "ticker": "AAPL",
+        "trans_type": "buy",
+        "type_code": "2",
+        "date": "2029-05-15",
+        "cur": "rub",
+        "qty": "3",
+        "price": "2600"
+    },
+    {
+        "user_email": "travis",
+        "ticker": "GAZP",
+        "trans_type": "buy",
+        "type_code": "2",
+        "date": "2029-05-15",
+        "cur": "rub",
+        "qty": "3",
+        "price": "2600"
     }
 ]

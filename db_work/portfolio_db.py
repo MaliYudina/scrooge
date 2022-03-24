@@ -2,7 +2,7 @@
 portfolio_db module creates DB and shows the current portfolio of a user"""
 
 from db_work.db_config import create_connection
-# from moex_api.get_prices import get_market_price
+from moex_api.get_prices import get_market_price
 
 import sqlite3
 connection = create_connection()
@@ -16,41 +16,41 @@ def get_tickers(connection) -> list:
     """
     ticker_list = []
     cursor = connection.cursor()
-    cursor.execute("SELECT ticker FROM Transactions;")
+    cursor.execute("SELECT DISTINCT ticker FROM Transactions;")
     result = cursor.fetchall()
+    print(result)
     for r in result:
-        if r[0] not in ticker_list:
-            ticker_list.append(r[0])
+        ticker_list.append(r[0])
     print("Total {} tickers in portfolio: ".format(len(ticker_list)), ticker_list)
     print(ticker_list)
     return ticker_list
 
 
-def get_possess_qty(connection=connection) -> int:
+def get_possess_qty(secid, connection=connection, ) -> int:
     """
     Gets current quantity of possessed shares
     :return:
     """
-    search_secid = ('MOEX',)
     cursor = connection.cursor()
-    # cursor.execute("""SELECT SUM(qty) FROM Transactions""")
-    cursor.execute("""SELECT SUM(qty) FROM Transactions WHERE ticker=?""", search_secid)
-
+    secid_tuple = ()
+    secid_tuple = secid_tuple + (secid,)
+    cursor.execute("""SELECT SUM(qty) FROM Transactions WHERE ticker=?""", tuple(secid_tuple))
     shares_qty = cursor.fetchone()
     print(shares_qty[0])
     return shares_qty
 
 
-def calculate_average_price() -> float:
-    search_secid = 'SBER'
+def calculate_average_price(secid) -> float:
+    secid_tuple = ()
+    secid_tuple = secid_tuple + (secid,)
     cursor = connection.cursor()
-    cursor.execute("SELECT SUM(qty) / COUNT(ticker)" # TODO суммирую сумму покупки и делю на количество транзакций
+    cursor.execute("""SELECT SUM(qty) / COUNT(ticker)"
                    "FROM Transactions"
-                   "WHERE ticker=?", search_secid)
-    # TODO аналог функции
-    total_price_list = [10, 20, 30]
-    average_price = sum(total_price_list) / len(total_price_list)
-    return average_price
+                   "WHERE ticker=?""", secid_tuple)
+    average_price = cursor.fetchone()
+    # print("average")
+    # print(average_price[0])
+    return average_price[0]
 
 
 def create_table_portfolio(connection):
@@ -65,7 +65,7 @@ def create_table_portfolio(connection):
                                     _id INTEGER PRIMARY KEY,
                                     ticker TEXT UNIQUE,
                                     shortname TEXT NOT NULL,
-                                    qty NOT NULL,
+                                    qty INTEGER NOT NULL,
                                     avg_price REAL NOT NULL,
                                     cur TEXT NOT NULL,
                                     market_price,
@@ -109,10 +109,6 @@ def update_values_portfolio(connection, portfolio_data):
             connection.commit()
 
 
-def portfolio_calculations():
-    pass
-
-
 def show_portfolio():
     cursor = connection.cursor()
     cursor.execute("SELECT * from Portfolio")
@@ -120,7 +116,6 @@ def show_portfolio():
     print("My portfolio ")
     for r in result:
         print(r)
-    portfolio_calculations()
     return result
 
 
@@ -132,33 +127,34 @@ def portfolio_save_to_csv():
     pass
 
 
-tickers = get_tickers(connection=connection)
-get_possess_qty(connection=connection)
+if __name__ == "__main__":
+    print("Running portfolio_db.py")
+    create_table_portfolio(connection=connection)
+    tickers = get_tickers(connection=connection)
+    for ticker in tickers:
+        shortname = 'short'
+        qty = get_possess_qty(secid=ticker, connection=connection)
+        avg_price = calculate_average_price(secid=ticker)
+        cur = "RUB"
+        market_price = 333
+        # market_price = get_market_price(ticker)
+        div_total = 100
+        div_percent_total = '10%'
+        total_margin = 100
+        total_margin_percent = "10%"
+        weight = '5%'
 
-shortname = ''
-# qty = get_possess_qty()
-# avg_price = calculate_average_price()
-cur = "RUB"
-# market_price = get_market_price()
-div_total = 100
-div_percent_total = '10%'
-total_margin = 100
-total_margin_percent = "10%"
-weight = '5%'
+        portfolio = (ticker, shortname,
+                        qty, avg_price,
+                        cur, market_price,
+                        div_total, div_percent_total,
+                        total_margin, total_margin_percent,
+                     weight)
+        print(portfolio)
+        portfolio_sum = 10000
+        print('Total portfolio value: ', portfolio_sum)
+        update_values_portfolio(connection=connection, portfolio_data=portfolio)
+        show_portfolio()
 
 
-# create_table_portfolio(connection=connection)
-#
-#
-# for ticker in tickers:
-#     portfolio = (ticker, shortname,
-#                     qty, avg_price,
-#                     cur, market_price,
-#                     div_total, div_percent_total,
-#                     total_margin, total_margin_percent,
-#                  weight)
-#
-#     update_values_portfolio(connection=connection, portfolio_data=portfolio)
-#
-#
 # user_portfolio = show_portfolio()  # <class 'list'>
