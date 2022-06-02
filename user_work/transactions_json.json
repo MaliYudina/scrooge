@@ -1,92 +1,62 @@
 [
     {
-        "user_email": "petr@test.ru",
-        "ticker": "MOEX",
-        "trans_type": "buy",
-        "type_code": "2",
-        "date": "2021-05-15",
-        "cur": "rub",
-        "qty": "13",
-        "price": "1300"
-    },
-    {
-        "user_email": "petr@test.ru",
-        "ticker": "MOEX",
-        "trans_type": "buy",
-        "type_code": "3",
-        "date": "2021-05-15",
-        "cur": "rub",
-        "qty": "2",
-        "price": "1400"
-    },
-    {
-        "user_email": "petr@test.ru",
-        "ticker": "SBER",
+        "user_email": "vasya",
+        "ticker": "ROSN",
         "trans_type": "buy",
         "type_code": "1",
-        "date": "2021-10-15",
+        "date": "2016-06-20",
         "cur": "rub",
-        "qty": "10",
-        "price": "2000"
+        "qty": "12",
+        "price": "3050"
     },
     {
-        "user_email": "vasya@test.ru",
-        "ticker": "SBER",
-        "trans_type": "sell",
+        "user_email": "vasya",
+        "ticker": "ROSN",
+        "trans_type": "buy",
         "type_code": "1",
-        "date": "2021-05-15",
+        "date": "2019-05-23",
         "cur": "rub",
-        "qty": "5",
-        "price": "2400"
+        "qty": "7",
+        "price": "700"
     },
     {
-        "user_email": "vasya@test.ru",
-        "ticker": "SBER",
+        "user_email": "vasya",
+        "ticker": "ALRS",
         "trans_type": "buy",
-        "type_code": "2",
-        "date": "2029-05-15",
+        "type_code": "1",
+        "date": "2018-07-20",
         "cur": "rub",
-        "qty": "3",
-        "price": "2600"
+        "qty": "9",
+        "price": "890"
     },
     {
-        "user_email": "vasya@test.ru",
-        "ticker": "TCSG",
-        "trans_type": "buy",
-        "type_code": "2",
-        "date": "2029-05-15",
-        "cur": "rub",
-        "qty": "3",
-        "price": "2600"
-    },
-    {
-        "user_email": "vasya@test.ru",
-        "ticker": "TCSG",
+        "user_email": "vasya",
+        "ticker": "ALRS",
         "trans_type": "sell",
         "type_code": "2",
-        "date": "2030-05-15",
+        "date": "2019-07-20",
         "cur": "rub",
-        "qty": "3",
-        "price": "6600"
+        "qty": "-1",
+        "price": "-950"
     },
     {
-        "user_email": "travis",
-        "ticker": "AAPL",
-        "trans_type": "buy",
-        "type_code": "2",
-        "date": "2029-05-15",
-        "cur": "rub",
-        "qty": "3",
-        "price": "2600"
-    },
-    {
-        "user_email": "travis",
+        "user_email": "vasya",
         "ticker": "GAZP",
         "trans_type": "buy",
-        "type_code": "2",
-        "date": "2029-05-15",
+        "type_code": "1",
+        "date": "2014-12-24",
         "cur": "rub",
-        "qty": "3",
-        "price": "2600"
+        "qty": "7",
+        "price": "900"
+    },
+    {
+        "user_email": "vasya",
+        "ticker": "GAZP",
+        "trans_type": "buy",
+        "type_code": "5",
+        "date": "2018-10-20",
+        "cur": "rub",
+        "qty": "90",
+        "price": "970"
     }
 ]

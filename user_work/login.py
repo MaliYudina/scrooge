@@ -4,12 +4,17 @@ Login module:
   - authorization of registered users
 """
 from datetime import datetime
-from db_work.db_config import create_connection
-from db_work.db_update import validate_login_pass, read_users_table, update_values_user
+from db_process.db_connection import create_connection
+from db_process.db_update import validate_login_pass, update_values_user
 
 
-def hi_user():
-    start_input = input("-- Hello, user! -- \nPlease type \n  'l' for login or \n  'r' for registration\n")
+def hi_user() -> str:
+    """
+    Asks user if login or registration required
+    :return: string value start_input
+    """
+    start_input = input("-- Hello, user! -- \nPlease type \n  'l' for login or "
+                        "\n  'r' for registration\n")
     return start_input
 
 
@@ -48,17 +53,29 @@ def register_user() -> tuple:
 
 
 def authorize_user(email, password, db_email, db_password):
+    """
+    Authorization of registration data
+    :param email:
+    :param password:
+    :param db_email:
+    :param db_password:
+    :return:
+    """
     if email in db_email:  # str email in db_email tuple
         if password == db_password:
             print("Welcome back, {}!. You are successfully signed in!".format(email))
-            return email
         else:
             print("Sorry, {}! Login data is wrong.\nPlease register new account or check login data.".format(email))
             hi_user()
 
 
-def run_welcome():
+def run_welcome() -> str:
+    """
+    Launch of login, registration and authorization logics
+    :return: user_name string value
+    """
     login_or_register = hi_user()
+    # TODO сделать проверку если не l/r
     if login_or_register == 'l':
         input_email_pass = login_user()
         input_email = input_email_pass[0]
@@ -72,12 +89,18 @@ def run_welcome():
                        db_email=stored_db_email,
                        db_password=stored_db_pass
                        )
+        user_name = input_email
+        print(user_name)
+        return user_name
     if login_or_register == 'r':
         new_user = register_user()
-        print("----- New user data: -----", new_user)
+        print("----- New user data: -----\n", new_user)
         update_values_user(connection=create_connection(),
                            user_data=new_user)
-        print("-----Let's see the User Table: -----")
+        user_name = new_user[0]
+        print(user_name)
+        return user_name
 
 
-run_welcome()
+if __name__ == "__main__":
+    run_welcome()

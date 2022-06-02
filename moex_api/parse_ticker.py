@@ -5,7 +5,7 @@ or a list of tickers received from web form or uploaded list
 import requests
 import json
 import os
-from user_work.get_user_input import upload_list
+from user_work.get_user_csv import upload_list
 
 BASE_DIR = os.path.join(os.getcwd())
 # print(BASE_DIR)
@@ -87,7 +87,7 @@ def filter_response(value_dict):
 #     return df
 
 
-value_dict = read_json(content_dict=get_json_from_moex())
-filter_response(value_dict)
+# value_dict = read_json(content_dict=get_json_from_moex())
+# filter_response(value_dict)
 # create_pandas_df()
 

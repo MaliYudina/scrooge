@@ -4,7 +4,6 @@ from sqlite3 import Error
 
 current_dir = os.path.abspath(os.path.dirname(__file__))
 db_file = os.path.join(current_dir, 'sql_investor.db')
-print(db_file)
 
 
 def create_connection():
@@ -16,3 +15,7 @@ def create_connection():
         print(f"The error '{e}' occurred")
 
     return connection
+
+
+if __name__ == "__main__":
+    create_connection()

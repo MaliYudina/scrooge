@@ -1,9 +1,11 @@
-user_email,ticker,trans_type,type_code,date,cur,qty,price,
-vasya@test.ru,MOEX,buy,2,2021-05-15,rub,13,1300
-vasya@test.ru,SBER,sell,1,2021-10-15,usd,7,1500.60
-vasya@test.ru,YNDX,buy,2,2021-05-15,rub,10,6700.90
-vasya@test.ru,ROSN,buy,230,2020-05-15,rub,173,8900.60
-vasya@test.ru,VTBX,buy,2,2022-01-15,rub,10,78900.90
-vasya@test.ru,SBER,buy,2,2021-05-15,rub,13,7300
-vasya@test.ru,SBER,buy,2,2029-05-15,rub,13,8300
+user_email,ticker,trans_type,type_code,date,cur,qty,price
+vasya,ROSN,buy,1,2016-06-20,rub,12,3050
+vasya,ROSN,buy,1,2019-05-23,rub,7,700
+vasya,ALRS,buy,1,2018-07-20,rub,9,890
+vasya,ALRS,sell,2,2019-07-20,rub,-1,-950
+vasya,GAZP,buy,1,2014-12-24,rub,7,900
+vasya,GAZP,buy,5,2018-10-20,rub,90,970
+
+
+
 

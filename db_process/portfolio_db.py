@@ -1,8 +1,12 @@
 """
-portfolio_db module creates DB and shows the current portfolio of a user"""
+portfolio_db module creates DB and shows the current portfolio of a user
+сделать апдейт в фоновом режиме
+"""
+import datetime
 
-from db_work.db_config import create_connection
+from db_process.db_connection import create_connection
 from moex_api.get_prices import get_market_price
+from calculations.assign_coupons import show_total_divs
 
 import sqlite3
 connection = create_connection()
@@ -36,7 +40,7 @@ def get_possess_qty(secid, connection=connection, ) -> int:
     secid_tuple = secid_tuple + (secid,)
     cursor.execute("""SELECT SUM(qty) FROM Transactions WHERE ticker=?""", tuple(secid_tuple))
     shares_qty = cursor.fetchone()
-    print(shares_qty[0])
+    shares_qty = shares_qty[0]
     return shares_qty
 
 
@@ -47,10 +51,11 @@ def calculate_average_price(secid) -> float:
     cursor.execute("""SELECT SUM(qty) / COUNT(ticker)"
                    "FROM Transactions"
                    "WHERE ticker=?""", secid_tuple)
-    average_price = cursor.fetchone()
-    # print("average")
-    # print(average_price[0])
-    return average_price[0]
+    average = cursor.fetchone()
+    average_price = average[0]
+    print(f"average price for {secid_tuple[0]} : {average_price}")
+
+    return average_price
 
 
 def create_table_portfolio(connection):
@@ -64,10 +69,10 @@ def create_table_portfolio(connection):
         sqlite_create_table_query = '''CREATE TABLE IF NOT EXISTS Portfolio (
                                     _id INTEGER PRIMARY KEY,
                                     ticker TEXT UNIQUE,
-                                    shortname TEXT NOT NULL,
-                                    qty INTEGER NOT NULL,
-                                    avg_price REAL NOT NULL,
-                                    cur TEXT NOT NULL,
+                                    shortname,
+                                    qty INTEGER,
+                                    avg_price,
+                                    cur,
                                     market_price,
                                     dividend_total,
                                     dividend_percent_total,
@@ -88,34 +93,73 @@ def create_table_portfolio(connection):
             connection.commit()
 
 
-def update_values_portfolio(connection, portfolio_data):
-    try:
-        cursor = connection.cursor()
-        sqlite_insert_query = """INSERT OR IGNORE INTO Portfolio
-                              (ticker, shortname, qty, avg_price, 
-                              cur, market_price, dividend_total, dividend_percent_total, 
-                              total_margin_rub, total_margin_percent, weight) 
-                              VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"""
-        cursor.execute(sqlite_insert_query, portfolio_data)
-        connection.commit()
-        print("Data to insert: ", portfolio_data)
-        connection.commit()
-        cursor.close()
-        print("---- Successfully added to Portfolio Table! ----")
-    except sqlite3.Error as error:
-        print("Failed to insert record into sqlite table Portfolio", error)
-    finally:
-        if connection:
+def update_values_portfolio(connection):
+    tickers = get_tickers(connection=connection)
+    for ticker in tickers:
+        shortname = ticker
+        qty = get_possess_qty(secid=ticker, connection=connection)
+        avg_price = calculate_average_price(secid=ticker)
+        cur = "RUB"
+        market_price = 333
+        market_price = get_market_price(ticker)
+        div_total = show_total_divs(secid=ticker)
+        div_total = div_total[0][0]
+        print(f'div total to write: {div_total}')
+        div_percent_total = '10%'
+        total_margin = 100
+        total_margin_percent = "10%"
+        weight = '5%'
+
+        portfolio_data = (ticker, shortname,
+                     qty, avg_price,
+                     cur, market_price,
+                     div_total, div_percent_total,
+                     total_margin, total_margin_percent,
+                     weight)
+        print(portfolio_data)
+        try:
+            cursor = connection.cursor()
+            sqlite_insert_query = """INSERT OR REPLACE INTO Portfolio
+                                  (ticker, shortname, qty, avg_price, 
+                                  cur, market_price, dividend_total, dividend_percent_total, 
+                                  total_margin_rub, total_margin_percent, weight) 
+                                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"""
+            print("Data to insert: ", portfolio_data)
+            cursor.execute(sqlite_insert_query, portfolio_data)
             connection.commit()
+            cursor.close()
+            print("---- Successfully added to Portfolio Table! ----")
+        except sqlite3.Error as error:
+            print("Failed to insert record into sqlite table Portfolio", error)
+        finally:
+            if connection:
+                connection.commit()
+
+
+def show_header():
+    user_name = 'Test user'
+    portfolio_cost = 34894,98
+    now = datetime.datetime
+    print(f"Header will be here\n {user_name} {portfolio_cost} {now}")
+
+
+def show_footer():
+    ticker_num = 'total 11 tickers'
+    portfolio_cost = 34894, 98
+    print(f"Footer will be here\n {ticker_num} {portfolio_cost}")
 
 
 def show_portfolio():
     cursor = connection.cursor()
+    create_table_portfolio(connection=connection)
+    update_values_portfolio(connection)
     cursor.execute("SELECT * from Portfolio")
+    print("--- My portfolio --- ")
     result = cursor.fetchall()
-    print("My portfolio ")
+    show_header()
     for r in result:
         print(r)
+    show_footer()
     return result
 
 
@@ -129,32 +173,8 @@ def portfolio_save_to_csv():
 
 if __name__ == "__main__":
     print("Running portfolio_db.py")
-    create_table_portfolio(connection=connection)
-    tickers = get_tickers(connection=connection)
-    for ticker in tickers:
-        shortname = 'short'
-        qty = get_possess_qty(secid=ticker, connection=connection)
-        avg_price = calculate_average_price(secid=ticker)
-        cur = "RUB"
-        market_price = 333
-        # market_price = get_market_price(ticker)
-        div_total = 100
-        div_percent_total = '10%'
-        total_margin = 100
-        total_margin_percent = "10%"
-        weight = '5%'
+    show_portfolio()
 
-        portfolio = (ticker, shortname,
-                        qty, avg_price,
-                        cur, market_price,
-                        div_total, div_percent_total,
-                        total_margin, total_margin_percent,
-                     weight)
-        print(portfolio)
-        portfolio_sum = 10000
-        print('Total portfolio value: ', portfolio_sum)
-        update_values_portfolio(connection=connection, portfolio_data=portfolio)
-        show_portfolio()
 
 
 # user_portfolio = show_portfolio()  # <class 'list'>
