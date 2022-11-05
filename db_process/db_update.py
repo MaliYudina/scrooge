@@ -4,12 +4,13 @@ DB_update module creates DB and updates the values for received tickers
 import sqlite3
 from db_process.db_connection import create_connection
 import logging
+from config import read_file_user_name
 
 logging.basicConfig(level=logging.INFO)
 LOG = logging.getLogger('run_coupons_job')
 
 connection = create_connection()
-session_user_name = '1000@test.ru'  # TODO вернуть из run.py?
+session_user_name = read_file_user_name()
 
 
 def create_table_user(connection):
@@ -108,7 +109,7 @@ def update_values_transactions(connection, user_name, transactions):
                             'commission': 3}
 
         for line in transactions:
-            user_email = user_name
+            user_email = session_user_name
             ticker = line['ticker']
             trans_type = line["trans_type"]
             type_code = choose_type_code.get(trans_type)
@@ -142,16 +143,17 @@ def create_table_dividends(connection):
     try:
         sqlite_create_table_query = '''CREATE TABLE IF NOT EXISTS Dividends (
                                      _id INTEGER PRIMARY KEY,
+                                     user_id,
                                      ticker TEXT,
                                      ISIN TEXT,
                                      last_purch_date,
                                      reg_close_date, 
                                      fact_paym_date,
                                      cur,
-                                     value REAL,
+                                     value,
                                      filtered_trans_id,
                                      div_paid,
-                                     UNIQUE (ticker, ISIN, last_purch_date, reg_close_date, fact_paym_date, value)
+                                     UNIQUE (user_id, ticker, ISIN, last_purch_date, reg_close_date, fact_paym_date, value)
                                      );'''
         cursor = connection.cursor()
         print("Successfully Connected to SQLite DB")
@@ -173,11 +175,13 @@ def update_values_dividends(connection, dividends):
         print("Connected to SQLite DB")
 
         sqlite_insert_query = """INSERT OR IGNORE INTO Dividends
-                               (ticker, isin, last_purch_date, 
-                               reg_close_date, fact_paym_date, cur, value, filtered_trans_id)
-                               VALUES (?, ?, ?, ?, ?, ?, ?, ?);"""
+                               (user_id, ticker, isin, 
+                               last_purch_date, reg_close_date, fact_paym_date, 
+                               cur, value, filtered_trans_id)
+                               VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);"""
 
         for line in dividends:
+            user_id = 'sys'
             ticker = line[0]
             isin = line[1]
             last_purch_date = line[2]
@@ -186,8 +190,10 @@ def update_values_dividends(connection, dividends):
             cur = line[5]
             value = line[6]
             filtered_trans_id = ''
-            update_data = (ticker, isin, last_purch_date,
-                           reg_close_date, fact_paym_date, cur, value, filtered_trans_id)
+            update_data = (user_id, ticker, isin, last_purch_date,
+                           reg_close_date, fact_paym_date, cur,
+                           value, filtered_trans_id, )
+            print(update_data)
             cursor.execute(sqlite_insert_query, update_data)
             connection.commit()
         print("Total", cursor.rowcount, "Records inserted successfully into DIVIDENDS table")
@@ -202,6 +208,7 @@ def update_values_dividends(connection, dividends):
 
 def update_dividends_values_paid(connection, secid, last_purch_date, start_date, end_date, div_paid_value):
     try:
+        print(LOG.info('update_dividends_values_paid'))
         cursor = connection.cursor()
         print("Connected to SQLite DB. !!! update_dividends_values_paid")
         print(f"try execute {secid} / {last_purch_date} / {div_paid_value}")
@@ -228,8 +235,11 @@ def update_dividends_values_paid(connection, secid, last_purch_date, start_date,
 
 def update_dividends_filtered_trans_id(connection, secid, last_purch_date, trans_id, div_paid):
     try:
+        print(LOG.info('update_dividends_filtered_trans_id'))
+        print(secid, last_purch_date, trans_id, div_paid)
         cursor = connection.cursor()
-        print(f"try execute {secid} / {last_purch_date} / {trans_id}")
+
+        # print(f"try execute {secid} / {last_purch_date} / {trans_id}")
         cursor.execute("""UPDATE Dividends
         SET filtered_trans_id = ?,
         div_paid = ?
@@ -247,6 +257,7 @@ def update_dividends_filtered_trans_id(connection, secid, last_purch_date, trans
     finally:
         if connection:
             connection.commit()
+
 
 def create_table_tickers(connection):
     """
@@ -303,7 +314,7 @@ def update_values_tickers(connection, ticker_data):
             ticker = ticker_data['SECID']
             # figi = ticker_data['FIGI']  # TODO добавить сюда резолв фигов
             figi = "figi_example"
-            class_code = "class_example"
+            class_code = "example"
             name = ticker_data['NAME']
             isin = ticker_data['ISIN']
             group = ticker_data['GROUP']
@@ -482,8 +493,8 @@ if __name__ == "__main__":
     con = connection
     logging.info('Check exisiting tables')
     check_tables()
-    read_tickers_table()
-    read_transactions_table()
+    # read_tickers_table()
+    # read_transactions_table()
     # get_tickers_data_for_dividends()
 
 
