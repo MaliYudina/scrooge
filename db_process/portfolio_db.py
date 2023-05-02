@@ -5,7 +5,7 @@ portfolio_db module creates DB and shows the current portfolio of a user
 import datetime
 
 from db_process.db_connection import create_connection
-from moex_api.get_prices import get_market_price
+# from moex_api.get_prices import get_market_price
 from calculations.assign_coupons import show_total_divs
 
 import sqlite3
@@ -68,6 +68,7 @@ def create_table_portfolio(connection):
     try:
         sqlite_create_table_query = '''CREATE TABLE IF NOT EXISTS Portfolio (
                                     _id INTEGER PRIMARY KEY,
+                                    user_email TEXT,
                                     ticker TEXT UNIQUE,
                                     shortname,
                                     qty INTEGER,
@@ -96,12 +97,13 @@ def create_table_portfolio(connection):
 def update_values_portfolio(connection):
     tickers = get_tickers(connection=connection)
     for ticker in tickers:
+        user_email = 'sys'
         shortname = ticker
         qty = get_possess_qty(secid=ticker, connection=connection)
         avg_price = calculate_average_price(secid=ticker)
         cur = "RUB"
         market_price = 333
-        market_price = get_market_price(ticker)
+        # market_price = get_market_price(ticker)
         div_total = show_total_divs(secid=ticker)
         div_total = div_total[0][0]
         print(f'div total to write: {div_total}')
@@ -110,7 +112,7 @@ def update_values_portfolio(connection):
         total_margin_percent = "10%"
         weight = '5%'
 
-        portfolio_data = (ticker, shortname,
+        portfolio_data = (user_email, ticker, shortname,
                      qty, avg_price,
                      cur, market_price,
                      div_total, div_percent_total,
@@ -120,10 +122,10 @@ def update_values_portfolio(connection):
         try:
             cursor = connection.cursor()
             sqlite_insert_query = """INSERT OR REPLACE INTO Portfolio
-                                  (ticker, shortname, qty, avg_price, 
+                                  (user_email, ticker, shortname, qty, avg_price, 
                                   cur, market_price, dividend_total, dividend_percent_total, 
                                   total_margin_rub, total_margin_percent, weight) 
-                                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"""
+                                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);"""
             print("Data to insert: ", portfolio_data)
             cursor.execute(sqlite_insert_query, portfolio_data)
             connection.commit()
@@ -137,9 +139,9 @@ def update_values_portfolio(connection):
 
 
 def show_header():
-    user_name = 'Test user'
-    portfolio_cost = 34894,98
-    now = datetime.datetime
+    user_name = 'Test user SYS'
+    portfolio_cost = 34894.98
+    now = datetime.datetime.now()
     print(f"Header will be here\n {user_name} {portfolio_cost} {now}")
 
 
@@ -157,6 +159,8 @@ def show_portfolio():
     print("--- My portfolio --- ")
     result = cursor.fetchall()
     show_header()
+    field_names = [i[0] for i in cursor.description]
+    print(field_names)
     for r in result:
         print(r)
     show_footer()

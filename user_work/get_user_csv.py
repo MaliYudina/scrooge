@@ -9,11 +9,14 @@ from db_process.db_connection import create_connection
 from db_process.db_update import update_values_transactions, update_values_tickers, \
     read_transactions_table, read_tickers_table
 from moex_api.get_specification import get_secid_specification
+from config import read_file_user_name
+
 
 current_dir = os.path.abspath(os.path.dirname(__file__))
 
 INPUT_CSV = os.path.join(current_dir, "add_transactions_template.csv")
 OUTPUT_JSON = os.path.join(current_dir, "transactions_json.json")
+session_user_name = read_file_user_name()
 logging.basicConfig(level=logging.INFO)
 LOG = logging.getLogger('get_user_csv')
 
@@ -23,7 +26,7 @@ def read_new_transactions():
     Пользователь загружает свой csv файл с новыми транзакциями
     формат записи:
     user_email,ticker,trans_type,type_code,date,cur,qty,price
-    user_email добавляется автоматически, когда пользователь залогинен
+    user_email добавляется автоматически, когда пользователь залогинен и имя сохранено в active session
     файл CSV преобразуется в JSON
 
     v 2.0 - ввод будет не через csv файл, а телеграм бот (строка, тапл)
@@ -59,9 +62,9 @@ def read_new_transactions():
 
 
 def add_new_transactions(new_transactions):
-    user_name = 'mali_na'
+    user_name = session_user_name
     update_values_transactions(connection=create_connection(),
-                               user_name=user_name,  # TODO здесь должно быть имя юзера после логина
+                               user_name=user_name,
                                transactions=new_transactions)
 
 

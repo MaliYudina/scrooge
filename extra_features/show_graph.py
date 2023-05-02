@@ -7,24 +7,33 @@ import requests
 
 
 def show_graph():
-    """
-    https://habr.com/en/post/495324/
-    Получить историю по одной бумаге на рынке за интервал дат.
-    :return:
-    """
-    base_url = 'http://iss.moex.com/'
-    engine = 'stock'
-    market = 'shares'
-    session = ''
-    boardid = 'TQBR'
-    security = 'SBER'
-    url = "http://iss.moex.com/iss/history/engines/{}/markets/{}/sessions/{}/securities/{}.json?".format(engine, market, session, security)
-    url2 = 'http://iss.moex.com/iss/history/engines/stock/markets/shares/boards/tqbr/securities/SBER.json?meta=off&date=2022-01-01'
-    print(url2)
-    all_prices = requests.get(url2)
+    try:
+        """
+        https://habr.com/en/post/495324/
+        Получить историю по одной бумаге на рынке за интервал дат.
+        :return:
+        """
+        print("some graph will be here")
+        base_url = 'http://iss.moex.com/'
+        engine = 'stock'
+        market = 'shares'
+        session = ''
+        boardid = 'TQBR'
+        security = 'SBER'
+        url = "http://iss.moex.com/iss/history/engines/{}/markets/{}/sessions/{}/securities/{}.json?".format(engine, market, session, security)
+        url2 = 'http://iss.moex.com/iss/history/engines/stock/markets/shares/boards/tqbr/securities/SBER.json?meta=off&date=2022-01-01'
+        print(url2)
+        all_prices = requests.get(url2)
 
-    all_prices = all_prices.json()
-    print(all_prices)
+        all_prices = all_prices.json()
+        print(all_prices)
+    except ConnectionError:
+        print('line 31, Connection error happened')
+        return ConnectionError.mro()
 
-show_graph()
+
+if __name__ == "__main__":
+    show_graph()
+
+
 

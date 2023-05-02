@@ -49,14 +49,17 @@ def group_transactions_per_period(secid, last_purch_date, prev_last_purch_date):
     WHERE ticker == ?
     AND date <= ? 
     AND date >= ?""", (secid, last_purch_date, prev_last_purch_date))
+    print(secid, last_purch_date, prev_last_purch_date)
     tickers_result = cur.fetchall()
-    print(f'Grouped transactions\n tickers_result for {prev_last_purch_date} / {last_purch_date}. Total {len(tickers_result)}')
+    # print(f'Grouped transactions\n tickers_result for {prev_last_purch_date} / {last_purch_date}. Total {len(tickers_result)}')
     filtered_trans_id = []
     for t in tickers_result:
         filtered_trans_id.append(t[0])
     # print(filtered_trans_id)
+    # print(tickers_result)
     print(tickers_result)
     return tickers_result
+
 
 
 def extract_sell_qty(transactions):
@@ -92,12 +95,12 @@ def subtotal(secid):
     # pprint(dates)
     n = 0
     result_list = []
-    print(result_list)
-    print('SUBTOTAL')
+    # print(result_list)
+    # print('SUBTOTAL')
     if len(interval_data) > 0:
         for date in interval_data:
-            print('date')
-            print(date)
+            # print('date')
+            # print(date)
             n = n + 1
             last_purch_date = date[1]
             prev_last_purch_date = date[0]
@@ -105,26 +108,27 @@ def subtotal(secid):
                                                          last_purch_date=last_purch_date,
                                                          prev_last_purch_date=prev_last_purch_date)
 
-            print('transactions')
-            print(transactions)
+            # print('transactions')
+            # print(transactions)
             shares_qty = extract_sell_qty(transactions)
             div_value = date[2]
             div_total = charge_dividends_payment(qty=shares_qty, value=div_value)
-            print(f'div_total={div_total}')
+            # print(f'div_total={div_total}')
             if transactions is not None:
-                print(f'shares_qty={shares_qty}')
+                # print(f'shares_qty={shares_qty}')
                 for t in transactions:
                     trans_id = t[0]
                     print(f'trans_id={t[0]}, shares_qty={shares_qty}, div_total={div_total} ')
                     update_dividends_filtered_trans_id(connection, secid, last_purch_date,
                                                        trans_id=trans_id, div_paid=div_total)
+                    print("Well done 121 line assign_coupons")
 
 
             filtered_trans_id = []
             for t in transactions:
                 filtered_trans_id.append(t[0])
             div_payment_data = (n, prev_last_purch_date, last_purch_date, div_total, shares_qty, filtered_trans_id)
-            print(f'div_payment_data={div_payment_data}')
+            # print(f'div_payment_data={div_payment_data}')
             result_list.append(div_payment_data)
             result_list = sorted(result_list, reverse=True)
         # print(result_list)
@@ -133,15 +137,15 @@ def subtotal(secid):
 
         # print(shares_qty_list)
         start_date = result_list[0][1]
-        print(start_date)
-        print(f'Start date {start_date}')
+        # print(start_date)
+        # print(f'Start date {start_date}')
         end_dates_list = [i[2] for i in result_list]
         # print(end_dates_list)
 
         num = 0
-        print('div_subresults')
-        print('order_num, start_date, end, sum(qty), sum(div_value2), '
-              '(div_value * sum(qty)), ({} per share)')
+        # print('div_subresults')
+        # print('order_num, start_date, end, sum(qty), sum(div_value2), '
+        #       '(div_value * sum(qty)), ({} per share)')
         pay_results = []
         while num < len(result_list):
             num += 1
@@ -152,13 +156,13 @@ def subtotal(secid):
             div_value = div_value_list[num-1]
             div_subresult = (order_num, start_date, end, sum(qty), sum(div_value2),
                              (div_value * sum(qty)))
-            print(f'{order_num}, {start_date}, {end}, {sum(qty)} pcs, {sum(div_value2)}, '
-                  f'{(div_value * sum(qty))}, {div_value}, per share')
+            # print(f'{order_num}, {start_date}, {end}, {sum(qty)} pcs, {sum(div_value2)}, '
+            #       f'{(div_value * sum(qty))}, {div_value}, per share')
             pay_results.append(div_subresult)
 
-        print('pay_results')
-        for p in pay_results:
-            print(p)
+        # print('pay_results')
+        # for p in pay_results:
+        #     print(p)
         return pay_results
     else:
         print("No SUBTOTAL")
@@ -166,9 +170,10 @@ def subtotal(secid):
 
 
 def pay_divs(secid):
-    print(f'pay_divs for {secid=}')
+    print(f' ------  pay_divs for {secid=}')
     answer = subtotal(secid)
-    print('Subtotal answer', answer)
+    for a in answer:
+        print(a)
     return answer
 
 
@@ -181,5 +186,5 @@ def show_total_divs(secid) -> int:
     return div_total
 
 
-# if __name__ == '__main__':
-#     pay_divs()
+if __name__ == '__main__':
+    pay_divs("ALRS")

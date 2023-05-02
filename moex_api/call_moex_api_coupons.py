@@ -4,16 +4,15 @@ Returns the sum and dates of received and planned dividends/coupons
 """
 import requests
 import json
-from pprint import pprint
-import logging
 from datetime import datetime, timedelta
 
-
+from log_work.log_setup import setup_logger
+logger = setup_logger()
+logger.info('call_moex_api_coupons start')
+LOGGER = logger
 
 file_format = 'json?'
 filename = 'coupons.json'
-logging.basicConfig(level=logging.INFO)
-LOG = logging.getLogger('call_moex_api_coupons')
 
 """
 Делим логику на :
@@ -32,10 +31,10 @@ def get_share_divs_from_moex(secid) -> tuple:
     :param secid:
     :return: dict of dividends
     """
-    LOG.info("1. Start get_coupons from MOEX API (get_share_divs_from_moex)...", )
+    LOGGER.info("1. Start get_coupons from MOEX API (get_share_divs_from_moex)...", )
     request_url = 'http://iss.moex.com/iss/securities/{}/dividends.{}&iss.meta=off'.format(
         secid, file_format)
-    print(request_url)
+    # print(request_url)
     response = requests.get(request_url)
     response.raise_for_status()  # raises exception when not a 2xx response
     coupons_data = response.json()  # <class 'dict'>
@@ -55,10 +54,9 @@ def get_share_divs_from_moex(secid) -> tuple:
             fact_paym_date = 'n/a'
             cur = c[4]
             value = c[3]
-            filtered_trans_id = '555'
             div_answer = (ticker, figi, str(last_purch_date), reg_close_date,
-                          fact_paym_date, cur, value, filtered_trans_id)
-            print(div_answer)
+                          fact_paym_date, cur, value)
+            # print(div_answer)
             div_list_answer.append(div_answer)
             # pprint(tuple(div_list_answer))
         return tuple(div_list_answer)

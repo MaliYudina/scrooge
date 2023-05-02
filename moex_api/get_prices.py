@@ -4,10 +4,14 @@ Returns the sum and dates of received and planned dividends/coupons
 """
 import requests
 import json
-import logging
+
 file_format = 'json'
-logging.basicConfig(level=logging.INFO)
-LOG = logging.getLogger('get_prices')
+
+from log_work.log_setup import setup_logger
+
+logger = setup_logger()
+logger.info(__name__)
+LOGGER = logger
 
 
 def url_constructor(secid):
@@ -51,9 +55,9 @@ def url_constructor(secid):
     market_value = markets.get(1)
     security_value = secid
 
-    moex_url = "http://iss.moex.com/iss/engines/{}/markets/{}/securities/{}.json?"\
+    moex_url = "http://iss.moex.com/iss/engines/{}/markets/{}/securities/{}.json?" \
         .format(engine_value, market_value, security_value)
-    print(moex_url)
+    LOGGER.info(moex_url)
     example_url = "http://iss.moex.com/iss/engines/stock/markets/shares/securities/sber.json?iss.meta=off"
 
     return moex_url
@@ -74,11 +78,11 @@ def get_secid_type(secid) -> str:
     :return: string name of instrument type
     """
     request_url = "https://iss.moex.com/iss/securities/{}.json?lang=en&iss.meta=off&iss.only=description".format(secid)
-                  # "" \
-                  # "https://iss.moex.com/iss/engines/stock/markets/shares/boards/" \
-                  # "TQBR/securities/{}.json?iss.dp=comma&iss.meta=off&iss.only=securities&" \
-                  # "description.columns=PREVADMITTEDQUOTE".format(secid)
-    print(request_url)
+    # "" \
+    # "https://iss.moex.com/iss/engines/stock/markets/shares/boards/" \
+    # "TQBR/securities/{}.json?iss.dp=comma&iss.meta=off&iss.only=securities&" \
+    # "description.columns=PREVADMITTEDQUOTE".format(secid)
+    LOGGER.info(request_url)
     response = requests.get(request_url)
     spec = response.json()
     secid_type = spec['description']['data']
@@ -102,53 +106,86 @@ def get_prices(secid, purchase_date):
     :param secid:
     :return:
     """
-    LOG.info("1. Start get_prices...", )
-    limit = 'limit=100&start=0'
-    today = '2022-01-01'
-    base_url = "/iss/statistics/engines/stock/currentprices"
-    request_url = 'http://iss.moex.com/iss/statistics/engines/stock/currentprices.json?'
-    # http://iss.moex.com/iss/securities/ROSN/dividends.json?from=2017-01-01&iss.meta=off
+    try:
+        LOGGER.info("1. Start get_prices...", )
+        limit = 'limit=100&start=0'
+        today = '2022-01-01'
+        base_url = "/iss/statistics/engines/stock/currentprices"
+        request_url = 'http://iss.moex.com/iss/statistics/engines/stock/currentprices.json?'
+        # http://iss.moex.com/iss/securities/ROSN/dividends.json?from=2017-01-01&iss.meta=off
         # "&limit=100&start=0&",
         # str('&'+'till=' + today))
-    print(request_url)
-    response = requests.get(request_url)
-    print(response)  # <Response [200]>
-    response.raise_for_status()  # raises exception when not a 2xx response
-    if response.status_code == 200:
-        print("Ok, Response 200")
-    coupons_data = response.json()  # <class 'dict'>
-    coupons = coupons_data['dividends']['data']
-    # [
-    # 		["SBER", "RU0009029540", "2019-06-13", 16, "RUB"],
-    # 		["SBER", "RU0009029540", "2020-10-05", 18.7, "RUB"],
-    # 		["SBER", "RU0009029540", "2021-05-12", 18.7, "RUB"]
-    # 	]
-    for c in coupons:
-        print(c)  # ['SBER', 'RU0009029540', '2019-06-13', 16, 'RUB']
-    LOG.info("2. Start dump json with coupons result ...", )
-    filename = "write_prices.json"
-    with open(filename, 'w') as f:
-        json.dump(coupons_data, f)
-    f.close()
-    LOG.info("3. Success dump json with coupons result ...", )
-    return coupons_data
-    # TODO возвращать список из списков?
-    #  sample_coupon_answer = [['YNDX', '15-03-2021', 21], ['YNDX', '15-10-2021', 7]]
+        LOGGER.info(request_url)
+        response = requests.get(request_url)
+        LOGGER.info(response)  # <Response [200]>
+        response.raise_for_status()  # raises exception when not a 2xx response
+        if response.status_code == 200:
+            LOGGER.info("Ok, Response 200")
+        coupons_data = response.json()  # <class 'dict'>
+        coupons = coupons_data['dividends']['data']
+        # [
+        # 		["SBER", "RU0009029540", "2019-06-13", 16, "RUB"],
+        # 		["SBER", "RU0009029540", "2020-10-05", 18.7, "RUB"],
+        # 		["SBER", "RU0009029540", "2021-05-12", 18.7, "RUB"]
+        # 	]
+        for c in coupons:
+            LOGGER.info(c)  # ['SBER', 'RU0009029540', '2019-06-13', 16, 'RUB']
+        LOGGER.info("2. Start dump json with coupons result ...", )
+        filename = "write_prices.json"
+        with open(filename, 'w') as f:
+            json.dump(coupons_data, f)
+        f.close()
+        LOGGER.info("3. Success dump json with coupons result ...", )
+        return coupons_data
+        # TODO возвращать список из списков?
+        #  sample_coupon_answer = [['YNDX', '15-03-2021', 21], ['YNDX', '15-10-2021', 7]]
+    except ConnectionError:
+        print(ConnectionError.mro())
+        return ConnectionError.mro()
+    else:
+        print("hello yahoo")
+        url = 'https://finance.yahoo.com/quote/{}/history'.format(stock)
+        with requests.session():
+            header = {'Connection': 'keep-alive',
+                      'Expires': '-1',
+                      'Upgrade-Insecure-Requests': '1',
+                      'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) \
+                               AppleWebKit/537.36 (KHTML, like Gecko) Chrome/54.0.2840.99 Safari/537.36'
+                      }
+
+            website = requests.get(url, headers=header)
+            soup = BeautifulSoup(website.text, 'lxml')
+            crumb = re.findall('"CrumbStore":{"crumb":"(.+?)"}', str(soup))
+        return (header, crumb[0], website.cookies)
+    finally:
+        print("Finally block worked")
+        return False
 
 
 def get_market_price(secid) -> float:
-    request_url = "https://iss.moex.com/iss/engines/stock/markets/shares/boards/" \
-                  "TQBR/securities/{}.json?iss.dp=comma&iss.meta=off&iss.only=securities&" \
-                  "securities.columns=PREVADMITTEDQUOTE".format(secid)
-    print(request_url)
-    response = requests.get(request_url)
-    price = response.json()
-    price_value = price['securities']['data'][0][0]
-    # if IndexError:
-    #     price_value = 0
-    print(price_value)
-    return price_value
+    try:
+        request_url = "https://iss.moex.com/iss/engines/stock/markets/shares/boards/" \
+                      "TQBR/securities/{}.json?iss.dp=comma&iss.meta=off&iss.only=securities&" \
+                      "securities.columns=PREVADMITTEDQUOTE".format(secid)
+        LOGGER.info(request_url)
+        response = requests.get(request_url)
+        price = response.json()
+        price_value = price['securities']['data'][0][0]
+        # if IndexError:
+        #     price_value = 0
+        LOGGER.info(price_value)
+        return price_value
+    except ConnectionError:
+        return ConnectionError.mro()
+    else:
+        return Exception.__class__.__name__
+    finally:
+        print("Finally block started")
+
     # print(response.json())  # <Response [200]>
 # TODO сделать ссылку независимой от типа инструмента (если это ПИФ , то уже не работает)
 
 # get_market_price(secid="VTBX")
+
+if __name__ == "__main__":
+    get_prices()

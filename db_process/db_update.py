@@ -6,10 +6,13 @@ from db_process.db_connection import create_connection
 import logging
 from config import read_file_user_name
 
-logging.basicConfig(level=logging.INFO)
-LOG = logging.getLogger('run_coupons_job')
+from log_work.log_setup import setup_logger
+logger = setup_logger()
+# logger.info('db_update.py start')
+LOGGER = logger
 
 connection = create_connection()
+LOGGER.info('db_update.py start')
 session_user_name = read_file_user_name()
 
 
@@ -33,17 +36,19 @@ def create_table_user(connection):
                                     date_joined datetime);'''
         # ('test@email.ru', 'kate', 'smirnova', 'kat123', 'Finam', '2022-02-15')
         cursor = connection.cursor()
-        print("Successfully Connected to SQLite DB")
+        LOGGER.info("Successfully Connected to SQLite DB")
         cursor.execute(sqlite_create_table_query)
         connection.commit()
-        print("SQLite table 'USERS' successfully created!")
+        LOGGER.info("SQLite table 'USERS' successfully created!")
         cursor.close()
 
     except sqlite3.Error as error:
         print("Error while creating a sqlite table ('USERS' table)", error)
+        LOGGER.error("Error while creating a sqlite table ('USERS' table)", error)
     finally:
         if connection:
             connection.commit()
+
 
 
 def update_values_user(connection, user_data):
@@ -54,16 +59,63 @@ def update_values_user(connection, user_data):
                               VALUES (?, ?, ?, ?, ?, ?);"""
         cursor.execute(sqlite_insert_query, user_data)
         connection.commit()
-        print("Data to insert: ", user_data)
+        # print("Data to insert: ", user_data)
         connection.commit()
         cursor.close()
+        LOGGER.info("Successfully added to USERS Table!")
         print("---- Successfully added to USERS Table! ----")
     except sqlite3.Error as error:
+        LOGGER.error("Failed to insert record into sqlite table USERS", error)
         print("Failed to insert record into sqlite table USERS", error)
     finally:
         if connection:
             connection.commit()
 
+def create_table_sessions(connection):
+    """
+        Table Sessions stores all the sessions of all users - name / start / end.
+        :param connection:
+        :return:
+        """
+    try:
+        sqlite_create_table_query = '''CREATE TABLE IF NOT EXISTS Sessions (
+                                    _id INTEGER PRIMARY KEY,
+                                    email TEXT UNIQUE, 
+                                    start_time datetime,
+                                    end_time datetime);'''
+        cursor = connection.cursor()
+        LOGGER.info("Successfully Connected to SQLite DB")
+        cursor.execute(sqlite_create_table_query)
+        connection.commit()
+        LOGGER.info("SQLite table 'SESSIONS' successfully created!")
+        cursor.close()
+
+    except sqlite3.Error as error:
+        print("Error while creating a sqlite table ('SESSIONS' table)", error)
+        LOGGER.error("Error while creating a sqlite table ('SESSIONS' table)", error)
+    finally:
+        if connection:
+            connection.commit()
+
+def update_values_sessions(connection, session):
+    try:
+        cursor = connection.cursor()
+        sqlite_insert_query = """INSERT OR IGNORE INTO Sessions
+                              (email, start_time, end_time)
+                              VALUES (?, ?, ?);"""
+        cursor.execute(sqlite_insert_query, session)
+        connection.commit()
+        # print("Data to insert: ", user_data)
+        connection.commit()
+        cursor.close()
+        LOGGER.info("Successfully added to Sessions Table!")
+        print("---- Successfully added to Sessions Table! ----")
+    except sqlite3.Error as error:
+        LOGGER.error("Failed to insert record into sqlite table Sessions", error)
+        print("Failed to insert record into sqlite table Sessions", error)
+    finally:
+        if connection:
+            connection.commit()
 
 def create_table_transactions(connection):
     try:
@@ -81,13 +133,14 @@ def create_table_transactions(connection):
                                      commission NOT NULL,
                                      est_taxes INTEGER DEFAULT 0);'''
         cursor = connection.cursor()
-        print("Successfully Connected to SQLite DB")
+        LOGGER.info("Successfully Connected to SQLite DB")
         cursor.execute(sqlite_create_table_query)
         connection.commit()
-        print("SQLite table 'TRANSACTIONS' successfully created!")
+        LOGGER.info("SQLite table 'TRANSACTIONS' successfully created!")
         cursor.close()
 
     except sqlite3.Error as error:
+        LOGGER.error("Error while creating a sqlite table ('TRANSACTIONS' table)", error)
         print("Error while creating a sqlite table ('TRANSACTIONS' table)", error)
     finally:
         if connection:
@@ -97,7 +150,7 @@ def create_table_transactions(connection):
 def update_values_transactions(connection, user_name, transactions):
     try:
         cursor = connection.cursor()
-        print("Connected to SQLite DB")
+        LOGGER.info("Connected to SQLite DB")
         sqlite_insert_query = """INSERT INTO Transactions
                                (user_email, ticker, trans_type, type_code, date, cur, qty, 
                                price, total_price, commission, est_taxes)
@@ -130,9 +183,11 @@ def update_values_transactions(connection, user_name, transactions):
             cursor.execute(sqlite_insert_query, update_data_sample)
 
             connection.commit()
+        LOGGER.info("Total", len(transactions), "records inserted successfully into TRANSACTIONS table")
         print("Total", len(transactions), "records inserted successfully into TRANSACTIONS table")
         # cursor.close()
     except sqlite3.Error as error:
+        LOGGER.info("Failed to insert multiple records into sqlite table TRANSACTIONS", error)
         print("Failed to insert multiple records into sqlite table TRANSACTIONS", error)
     finally:
         if connection:
@@ -156,13 +211,14 @@ def create_table_dividends(connection):
                                      UNIQUE (user_id, ticker, ISIN, last_purch_date, reg_close_date, fact_paym_date, value)
                                      );'''
         cursor = connection.cursor()
-        print("Successfully Connected to SQLite DB")
+        LOGGER.info("Successfully Connected to SQLite DB")
         cursor.execute(sqlite_create_table_query)
         connection.commit()
-        print("SQLite table 'DIVIDENDS' successfully created!")
+        LOGGER.info("SQLite table 'DIVIDENDS' successfully created!")
         cursor.close()
 
     except sqlite3.Error as error:
+        LOGGER.error("Error while creating a sqlite table ('DIVIDENDS' table)", error)
         print("Error while creating a sqlite table ('DIVIDENDS' table)", error)
     finally:
         if connection:
@@ -172,7 +228,7 @@ def create_table_dividends(connection):
 def update_values_dividends(connection, dividends):
     try:
         cursor = connection.cursor()
-        print("Connected to SQLite DB")
+        LOGGER.info("Connected to SQLite DB")
 
         sqlite_insert_query = """INSERT OR IGNORE INTO Dividends
                                (user_id, ticker, isin, 
@@ -193,13 +249,15 @@ def update_values_dividends(connection, dividends):
             update_data = (user_id, ticker, isin, last_purch_date,
                            reg_close_date, fact_paym_date, cur,
                            value, filtered_trans_id, )
-            print(update_data)
+            LOGGER.debug(update_data)
             cursor.execute(sqlite_insert_query, update_data)
             connection.commit()
+        LOGGER.info("Total", cursor.rowcount, "Records inserted successfully into DIVIDENDS table")
         print("Total", cursor.rowcount, "Records inserted successfully into DIVIDENDS table")
         # cursor.close()
 
     except sqlite3.Error as error:
+        LOGGER.error("Failed to insert multiple records into sqlite table DIVIDENDS", error)
         print("Failed to insert multiple records into sqlite table DIVIDENDS", error)
     finally:
         if connection:
@@ -208,10 +266,10 @@ def update_values_dividends(connection, dividends):
 
 def update_dividends_values_paid(connection, secid, last_purch_date, start_date, end_date, div_paid_value):
     try:
-        print(LOG.info('update_dividends_values_paid'))
+        LOGGER.debug('update_dividends_values_paid')
         cursor = connection.cursor()
-        print("Connected to SQLite DB. !!! update_dividends_values_paid")
-        print(f"try execute {secid} / {last_purch_date} / {div_paid_value}")
+        LOGGER.info("Connected to SQLite DB. !!! update_dividends_values_paid")
+        LOGGER.debug(f"try execute {secid} / {last_purch_date} / {div_paid_value}")
         cursor.execute("""UPDATE Dividends
         SET div_paid = ?
         WHERE ticker == ?
@@ -220,13 +278,15 @@ def update_dividends_values_paid(connection, secid, last_purch_date, start_date,
         result = cursor.fetchall()
         # TODO last_purch_date надо заменить - так как result_tickers = дивидендный период:
         #  tickers_result for 2014 - 06 - 14 00: 00: 00 / 2015 - 06 - 12 00: 00:00. Total 5
-        print(result)
+        # LOGGER.debug(f'line 234 of db_update.py {result}')
         # cursor.execute(sqlite_insert_query, update_data)
         connection.commit()
+        LOGGER.info("Total", cursor.rowcount, "Records inserted successfully into DIVIDENDS table")
         print("Total", cursor.rowcount, "Records inserted successfully into DIVIDENDS table")
         # cursor.close()
 
     except sqlite3.Error as error:
+        LOGGER.error("Failed to insert multiple records into sqlite table DIVIDENDS", error)
         print("Failed to insert multiple records into sqlite table DIVIDENDS", error)
     finally:
         if connection:
@@ -235,8 +295,8 @@ def update_dividends_values_paid(connection, secid, last_purch_date, start_date,
 
 def update_dividends_filtered_trans_id(connection, secid, last_purch_date, trans_id, div_paid):
     try:
-        print(LOG.info('update_dividends_filtered_trans_id'))
-        print(secid, last_purch_date, trans_id, div_paid)
+        LOGGER.info('update_dividends_filtered_trans_id')
+        LOGGER.debug(secid, last_purch_date, trans_id, div_paid)
         cursor = connection.cursor()
 
         # print(f"try execute {secid} / {last_purch_date} / {trans_id}")
@@ -246,13 +306,15 @@ def update_dividends_filtered_trans_id(connection, secid, last_purch_date, trans
         WHERE ticker == ?
         AND last_purch_date == ?""", (trans_id, div_paid, secid, last_purch_date))
         result = cursor.fetchall()
-        print(result)
+        # print(result)
         # cursor.execute(sqlite_insert_query, update_data)
         connection.commit()
+        LOGGER.info("Total", cursor.rowcount, "Records inserted successfully into DIVIDENDS table")
         print("Total", cursor.rowcount, "Records inserted successfully into DIVIDENDS table")
         # cursor.close()
 
     except sqlite3.Error as error:
+        LOGGER.error("Failed to insert multiple records into sqlite table DIVIDENDS", error)
         print("Failed to insert multiple records into sqlite table DIVIDENDS", error)
     finally:
         if connection:
@@ -279,13 +341,15 @@ def create_table_tickers(connection):
                                     groupname text NOT NULL,
                                     typename text NOT NULL);'''
         cursor = connection.cursor()
-        print("Successfully Connected to SQLite DB")
+        LOGGER.info("Successfully Connected to SQLite DB")
+        # print("Successfully Connected to SQLite DB")
         cursor.execute(sqlite_create_table_query)
         connection.commit()
-        print("SQLite table 'TICKERS' successfully created!")
+        LOGGER.info("SQLite table 'TICKERS' successfully created!")
         cursor.close()
 
     except sqlite3.Error as error:
+        LOGGER.error("Error while creating a sqlite table ('Tickers' table)", error)
         print("Error while creating a sqlite table ('Tickers' table)", error)
     finally:
         if connection:
@@ -302,10 +366,10 @@ def update_values_tickers(connection, ticker_data):
     """
     try:
         cursor = connection.cursor()
-        print("Connected to SQLite DB")
+        LOGGER.info("Connected to SQLite DB")
         cursor.execute("SELECT DISTINCT ticker from Transactions;")
         tickers_set = cursor.fetchall()
-        print(tickers_set)
+        # print(tickers_set)
         for ticker in tickers_set:
             # print(ticker[0])
             sqlite_insert_query = """INSERT OR IGNORE INTO Tickers
@@ -326,10 +390,12 @@ def update_values_tickers(connection, ticker_data):
             cursor.execute(sqlite_insert_query, update_data)
             connection.commit()
         print("Total", cursor.rowcount, "Records inserted successfully into TICKERS table")
+        LOGGER.info("Total", cursor.rowcount, "Records inserted successfully into TICKERS table")
         connection.commit()
         cursor.close()
 
     except sqlite3.Error as error:
+        LOGGER.error("Failed to insert multiple records into sqlite table TICKERS", error)
         print("Failed to insert multiple records into sqlite table TICKERS", error)
     finally:
         if connection:
@@ -352,13 +418,14 @@ def create_table_history_prices(connection):
                                     date datetime,
                                     price DECIMAL NOT NULL);'''
         cursor = connection.cursor()
-        print("Successfully Connected to SQLite DB")
+        LOGGER.info("Successfully Connected to SQLite DB")
         cursor.execute(sqlite_create_table_query)
         connection.commit()
-        print("SQLite table PRICES successfully created!")
+        LOGGER.info("SQLite table PRICES successfully created!")
         cursor.close()
 
     except sqlite3.Error as error:
+        LOGGER.error("Error while creating a sqlite table (PRICES table)", error)
         print("Error while creating a sqlite table (PRICES table)", error)
     finally:
         if connection:
@@ -368,7 +435,7 @@ def create_table_history_prices(connection):
 def update_values_history_prices(connection):
     try:
         cursor = connection.cursor()
-        print("Connected to SQLite DB")
+        LOGGER.info("Connected to SQLite DB")
 
         sqlite_insert_query = """INSERT INTO Prices
                               (ticker, name, date, price)
@@ -382,11 +449,13 @@ def update_values_history_prices(connection):
         prices_data = prices_data_sample
         cursor.executemany(sqlite_insert_query, prices_data)
         connection.commit()
+        LOGGER.info("Total", cursor.rowcount, "Records inserted successfully into PRICES table")
         print("Total", cursor.rowcount, "Records inserted successfully into PRICES table")
         connection.commit()
         cursor.close()
 
     except sqlite3.Error as error:
+        LOGGER.error("Failed to insert multiple records into sqlite table PRICES", error)
         print("Failed to insert multiple records into sqlite table PRICES", error)
     finally:
         if connection:
@@ -483,6 +552,7 @@ def check_tables():
     check_tables initiates creation (if not exists) of tables
     """
     create_table_user(connection)
+    create_table_sessions(connection)
     create_table_transactions(connection)
     create_table_dividends(connection)
     create_table_tickers(connection)

@@ -1,6 +1,12 @@
 """
 Profit_calculation module shows the current portfolio price
 """
+
+import numpy
+
+# numpy.fv(rate, nper, pmt, pv, when='end')
+
+
 all_transactions = [['MOEX', 2, 3400],
                     ['MOEX', 10, 3000],
                     ['SBER', 10, 1500],
