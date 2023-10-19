@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Portfolio</title>
+</head>
+<body>
+    <h1>Portfolio for {{ user_name }}</h1>
+    <table>
+        <tr>
+            <th>Ticker</th>
+            <th>Short Name</th>
+            <th>Quantity</th>
+            <!-- Add more table headers for other columns -->
+        </tr>
+        {% for row in data %}
+            <tr>
+                <td>{{ row[2] }}</td>
+                <td>{{ row[3] }}</td>
+                <td>{{ row[4] }}</td>
+                <!-- Add more table cells for other columns -->
+            </tr>
+        {% endfor %}
+    </table>
+</body>
+</html>

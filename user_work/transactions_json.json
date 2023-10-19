@@ -1,59 +1,56 @@
 [
     {
-        "ticker": "LNZL",
+        "user_email": "vasya",
+        "ticker": "ROSN",
         "trans_type": "buy",
         "type_code": "1",
-        "date": "2018-06-25",
+        "date": "2016-06-20",
         "cur": "rub",
-        "qty": "10",
-        "price": "3150"
+        "qty": "12",
+        "price": "3050"
     },
     {
-        "ticker": "LNZL",
+        "user_email": "vasya",
+        "ticker": "ROSN",
         "trans_type": "buy",
         "type_code": "1",
-        "date": "2019-06-25",
+        "date": "2019-05-23",
         "cur": "rub",
-        "qty": "5",
-        "price": "3870"
+        "qty": "7",
+        "price": "700"
     },
     {
+        "user_email": "vasya",
         "ticker": "ALRS",
-        "trans_type": "buy",
-        "type_code": "1",
-        "date": "2016-06-25",
-        "cur": "rub",
-        "qty": "10",
-        "price": "650"
-    },
-    {
-        "ticker": "CNTLP",
         "trans_type": "buy",
         "type_code": "1",
         "date": "2018-07-20",
         "cur": "rub",
-        "qty": "7",
+        "qty": "9",
         "price": "890"
     },
     {
-        "ticker": "CNTLP",
+        "user_email": "vasya",
+        "ticker": "ALRS",
         "trans_type": "sell",
         "type_code": "2",
-        "date": "2019-03-20",
+        "date": "2019-07-20",
         "cur": "rub",
         "qty": "-1",
         "price": "-950"
     },
     {
-        "ticker": "CNTLP",
+        "user_email": "vasya",
+        "ticker": "GAZP",
         "trans_type": "buy",
         "type_code": "1",
         "date": "2014-12-24",
         "cur": "rub",
-        "qty": "4",
+        "qty": "7",
         "price": "900"
     },
     {
+        "user_email": "vasya",
         "ticker": "GAZP",
         "trans_type": "buy",
         "type_code": "5",

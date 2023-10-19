@@ -2,7 +2,7 @@ from db_process.dividend_work import tickers_caller
 from db_process.db_connection import create_connection
 from db_process.db_update import update_values_dividends, update_dividends_values_paid
 from moex_api.call_moex_api_coupons import get_share_divs_from_moex
-from tink_api.get_dividends_value_tink import resolve_share_figi, call_share_divs_from_tink
+# from tink_api.get_dividends_value_tink import resolve_share_figi, call_share_divs_from_tink
 from .assign_coupons import pay_divs
 from datetime import datetime, timedelta
 import logging

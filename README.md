@@ -1,3 +1,12 @@
+How to use the application:
+
+git clone https://github.com/MaliYudina/scrooge.git
+pip install -r requirements.txt
+export env INVEST_TOKEN=<value>
+python3 run.py
+
+
+
 Application for personal portfolio management: 
 
 1.Transactions management:

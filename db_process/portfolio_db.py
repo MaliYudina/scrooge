@@ -3,10 +3,18 @@ portfolio_db module creates DB and shows the current portfolio of a user
 сделать апдейт в фоновом режиме
 """
 import datetime
+from flask import Flask, render_template
+import sqlite3
+
+app = Flask(__name__)
 
 from db_process.db_connection import create_connection
 # from moex_api.get_prices import get_market_price
 from calculations.assign_coupons import show_total_divs
+
+
+from config import read_file_user_name
+session_user_name = read_file_user_name()
 
 import sqlite3
 connection = create_connection()
@@ -97,7 +105,7 @@ def create_table_portfolio(connection):
 def update_values_portfolio(connection):
     tickers = get_tickers(connection=connection)
     for ticker in tickers:
-        user_email = 'sys'
+        user_email = session_user_name
         shortname = ticker
         qty = get_possess_qty(secid=ticker, connection=connection)
         avg_price = calculate_average_price(secid=ticker)
@@ -106,7 +114,7 @@ def update_values_portfolio(connection):
         # market_price = get_market_price(ticker)
         div_total = show_total_divs(secid=ticker)
         div_total = div_total[0][0]
-        print(f'div total to write: {div_total}')
+        # print(f'div total to write: {div_total}')
         div_percent_total = '10%'
         total_margin = 100
         total_margin_percent = "10%"
@@ -139,7 +147,7 @@ def update_values_portfolio(connection):
 
 
 def show_header():
-    user_name = 'Test user SYS'
+    user_name = session_user_name
     portfolio_cost = 34894.98
     now = datetime.datetime.now()
     print(f"Header will be here\n {user_name} {portfolio_cost} {now}")
@@ -151,20 +159,23 @@ def show_footer():
     print(f"Footer will be here\n {ticker_num} {portfolio_cost}")
 
 
+@app.route('/portfolio')
 def show_portfolio():
     cursor = connection.cursor()
     create_table_portfolio(connection=connection)
     update_values_portfolio(connection)
-    cursor.execute("SELECT * from Portfolio")
+    user_name = session_user_name
     print("--- My portfolio --- ")
-    result = cursor.fetchall()
     show_header()
+    cursor.execute("""SELECT * from Portfolio WHERE user_email=?;""", [user_name])
+    result = cursor.fetchall()
     field_names = [i[0] for i in cursor.description]
     print(field_names)
     for r in result:
         print(r)
     show_footer()
-    return result
+    # return result
+    return render_template('portfolio.html', data=result)
 
 
 def portfolio_save_to_csv():

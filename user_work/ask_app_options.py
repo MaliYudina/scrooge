@@ -6,7 +6,7 @@ import logging.config
  # если закоментировать импорт этих библиотек, то программа не будет падать
 from extra_features.news import show_news
 from extra_features.show_graph import show_graph
-from calculations.run_coupons_job import get_coupons
+from calculations.dividends_calendar import get_coupons
 from db_process.portfolio_db import show_portfolio
 from user_work.exit_application import exit_app
 from user_work.get_user_csv import call_add_new_transactions

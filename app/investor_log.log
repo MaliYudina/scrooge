@@ -1,0 +1,7 @@
+INFO] - "2023-10-18 18:32:29" - log_work.log_setup - : Connection to SQLite DB successful in /Users/mali/PycharmProjects/investor/db_process/db_connection.py:18
+INFO] - "2023-10-18 18:32:29" - log_work.log_setup - : db_update.py start in /Users/mali/PycharmProjects/investor/db_process/db_update.py:15
+INFO] - "2023-10-18 18:32:29" - log_work.log_setup - : Connection to SQLite DB successful in /Users/mali/PycharmProjects/investor/db_process/db_connection.py:18
+INFO] - "2023-10-18 18:32:29" - log_work.log_setup - : Connection to SQLite DB successful in /Users/mali/PycharmProjects/investor/db_process/db_connection.py:18
+WARNING] - "2023-10-18 18:32:29" - werkzeug - :  * Running on all addresses.
+   WARNING: This is a development server. Do not use it in a production deployment. in /Users/mali/PycharmProjects/investor/.venv/lib/python3.9/site-packages/werkzeug/_internal.py:225
+INFO] - "2023-10-18 18:32:29" - werkzeug - :  * Running on http://192.168.20.222:5100/ (Press CTRL+C to quit) in /Users/mali/PycharmProjects/investor/.venv/lib/python3.9/site-packages/werkzeug/_internal.py:225

@@ -1,0 +1,2 @@
+INFO] - "2023-05-02 18:00:51" - log_work.log_setup - : Connection to SQLite DB successful in /Users/mali/PycharmProjects/investor/db_process/db_connection.py:18
+INFO] - "2023-05-02 18:00:51" - log_work.log_setup - : db_update.py start in /Users/mali/PycharmProjects/investor/db_process/db_update.py:15
